@@ -13,8 +13,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.gofit.login.ForgotPassword
+import com.example.gofit.login.ForgotPasswordScreen
 import com.example.gofit.login.LoginScreen
 import com.example.gofit.login.LoginViewModel
+import com.example.gofit.login.Menu
 import com.example.gofit.login.RegistroScreen
 import com.example.gofit.login.RegistroViewModel
 import com.example.gofit.ui.theme.GoFitTheme
@@ -35,6 +38,10 @@ class MainActivity : ComponentActivity() {
                        }
 
                        composable("RegistroScreen"){  RegistroScreen(viewModel = RegistroViewModel(),navigationController )
+                       }
+                       composable("Menu"){  Menu(navigationController )
+                       }
+                       composable("ForgotPassword"){  ForgotPasswordScreen(navigationController )
                        }
                    }
 

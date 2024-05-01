@@ -55,13 +55,13 @@ fun LoginScreen(viewModel: LoginViewModel, navigationController: NavHostControll
     Box(
         Modifier
             .fillMaxSize()
-            .padding(8.dp)
+            .padding(2.dp)
             .background(Color.White)
 
 
     ) {
         Header(Modifier.align(Alignment.TopEnd))
-        Body(Modifier.align(Alignment.Center),viewModel)
+        Body(Modifier.align(Alignment.Center),viewModel,navigationController)
         Footer(Modifier.align(Alignment.BottomCenter),navigationController)
     }
 
@@ -99,7 +99,7 @@ fun SingUp(navigationController: NavHostController) {
 }
 
 @Composable
-fun Body(modifier: Modifier, viewModel: LoginViewModel) {
+fun Body(modifier: Modifier, viewModel: LoginViewModel, navigationController: NavHostController) {
 
     val email: String by viewModel.email.observeAsState(initial = "")
     val password: String by viewModel.password.observeAsState(initial = "")
@@ -116,9 +116,9 @@ fun Body(modifier: Modifier, viewModel: LoginViewModel) {
         Spacer(modifier = Modifier.size(4.dp))
         Password(password, passwordVisibility, onTextChanged = { viewModel.onLoginChanged(email, it) }, viewModel = viewModel)
         Spacer(modifier = Modifier.size(8.dp))
-        ForgotPassword(Modifier.align(Alignment.End))
+        ForgotPassword(Modifier.align(Alignment.End),navigationController)
         Spacer(modifier = Modifier.size(16.dp))
-        LoginButton(loginEnable){viewModel.onLoginSelected()}
+        LoginButton(loginEnable,navigationController){viewModel.onLoginSelected()}
         Spacer(modifier = Modifier.size(16.dp))
         LoginDivider()
         Spacer(modifier = Modifier.size(32.dp))
@@ -175,9 +175,14 @@ fun LoginDivider() {
 }
 
 @Composable
-fun LoginButton(isLoginEnabled: Boolean,onLoginSelected: () -> Unit) {
+fun LoginButton(
+    isLoginEnabled: Boolean,
+    navigationController: NavHostController,
+    onLoginSelected: () -> Unit
+) {
     Button(
-        onClick = {onLoginSelected()},
+        onClick = {onLoginSelected()
+            navigationController.navigate("Menu") },
         enabled = isLoginEnabled,
         modifier = Modifier.fillMaxWidth(),
         colors = ButtonDefaults.buttonColors(
@@ -191,19 +196,16 @@ fun LoginButton(isLoginEnabled: Boolean,onLoginSelected: () -> Unit) {
     }
 }
 
-fun enabledLogin(email: String,password: String):Boolean{
-    return Patterns.EMAIL_ADDRESS.matcher(email).matches()&& password.length  >= 6
 
-}
 
 @Composable
-fun ForgotPassword(modifier: Modifier) {
+fun ForgotPassword(modifier: Modifier, navigationController: NavHostController) {
     Text(
         text = "¿Olvido su contraseña?",
         fontSize = 12.sp,
         fontWeight = FontWeight.Bold,
         color = Color(0xFF4EA8E9),
-        modifier = modifier
+        modifier = modifier.clickable { navigationController.navigate("ForgotPassword") }
     )
 }
 

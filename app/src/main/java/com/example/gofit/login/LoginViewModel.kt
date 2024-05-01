@@ -4,6 +4,7 @@ import android.util.Patterns
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import java.util.Calendar
 
 class LoginViewModel : ViewModel(){
 
@@ -18,6 +19,7 @@ class LoginViewModel : ViewModel(){
 
   private val _LoginEnable=MutableLiveData<Boolean>()
   val loginEnable: LiveData<Boolean> = _LoginEnable
+
 
   fun onLoginChanged(email :String ,password :String){
     _email.value=email
@@ -41,6 +43,9 @@ class LoginViewModel : ViewModel(){
     _passwordVisibility.value=!passwordVisibility
 
   }
+
+
+
 
 
 }
