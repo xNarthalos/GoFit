@@ -13,8 +13,13 @@ class RegistroViewModel : ViewModel() {
     private val _password =MutableLiveData<String>()
     val password: LiveData<String> = _password
 
+    private val _repetirPassword = MutableLiveData<String>()
+    val repetirPassword: LiveData<String> = _repetirPassword
+
+
     private val _userName =MutableLiveData<String>()
     val userName: LiveData<String> = _userName
+
     private val _fechaDeNacimiento = MutableLiveData<Calendar>()
     val fechaDeNacimiento: LiveData<Calendar> = _fechaDeNacimiento
 
@@ -25,12 +30,13 @@ class RegistroViewModel : ViewModel() {
     }
 
 
-    fun onRegistroChanged(email :String ,password :String,userName : String){
-
-        _email.value=email
-        _password.value=password
-        _userName.value= userName
+    fun onRegistroChanged(email: String, password: String, userName: String, repetirPassword: String) {
+        _email.value = email
+        _password.value = password
+        _repetirPassword.value = repetirPassword
+        _userName.value = userName
     }
+
     fun setFechaDeNacimiento(fecha: Calendar) {
         _fechaDeNacimiento.value = fecha
     }

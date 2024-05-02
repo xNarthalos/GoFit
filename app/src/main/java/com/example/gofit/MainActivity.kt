@@ -15,6 +15,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.gofit.login.ForgotPassword
 import com.example.gofit.login.ForgotPasswordScreen
+import com.example.gofit.login.ForgotPasswordViewModel
 import com.example.gofit.login.LoginScreen
 import com.example.gofit.login.LoginViewModel
 import com.example.gofit.login.Menu
@@ -41,7 +42,7 @@ class MainActivity : ComponentActivity() {
                        }
                        composable("Menu"){  Menu(navigationController )
                        }
-                       composable("ForgotPassword"){  ForgotPasswordScreen(navigationController )
+                       composable("ForgotPassword"){  ForgotPasswordScreen(viewModel= ForgotPasswordViewModel(),navigationController)
                        }
                    }
 
