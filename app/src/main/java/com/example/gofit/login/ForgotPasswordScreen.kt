@@ -19,7 +19,6 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -44,11 +43,13 @@ fun ForgotPasswordScreen(viewModel: ForgotPasswordViewModel, navigationControlle
 }
 
 @Composable
-fun ButtonForgot() {
+fun ButtonForgot(loginButtonEnable: Boolean) {
     Button(
         onClick = {},
-        enabled = true,
-        modifier = Modifier.fillMaxWidth().padding(6.dp),
+        enabled = loginButtonEnable,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(6.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = Color(0xFF5DCF14),
             disabledContainerColor = Color(0xFF5DCF14),
@@ -63,12 +64,13 @@ fun ButtonForgot() {
 @Composable
 fun BodyForgot(modifier: Modifier,viewModel: ForgotPasswordViewModel) {
     val email: String by viewModel.email.observeAsState(initial = "")
+    val loginButtonEnable: Boolean by viewModel.forgotButtonEnable.observeAsState(initial = false)
 
     Column(modifier=modifier) {
         EmailForgot(email){ viewModel.onForgotPasswordChanged(it) }
 
         Spacer(modifier = Modifier.size(16.dp))
-        ButtonForgot()
+        ButtonForgot(loginButtonEnable)
     }
 }
 

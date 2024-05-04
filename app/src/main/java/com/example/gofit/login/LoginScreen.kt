@@ -4,7 +4,6 @@ package com.example.gofit.login
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.util.Patterns
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -210,7 +209,10 @@ fun ForgotPassword(modifier: Modifier, navigationController: NavHostController) 
 }
 
 @Composable
-fun Password(password: String, passwordVisibility: Boolean, onTextChanged: (String) -> Unit ,viewModel: LoginViewModel) {
+fun Password(
+    password: String, passwordVisibility: Boolean, onTextChanged: (String) -> Unit,
+    viewModel: LoginViewModel
+) {
 
 
     TextField(

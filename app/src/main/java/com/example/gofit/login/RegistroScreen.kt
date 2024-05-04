@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,6 +34,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import java.text.SimpleDateFormat
@@ -71,6 +74,9 @@ fun BodyRegistro(modifier: Modifier, viewModel: RegistroViewModel) {
     val password: String by viewModel.password.observeAsState(initial = "")
     val repetirPassword: String by viewModel.repetirPassword.observeAsState(initial = "")
     val userName: String by viewModel.userName.observeAsState(initial = "")
+    val registroEnable: Boolean by viewModel.registroEnable.observeAsState(initial = false)
+    val passwordVisibility: Boolean by viewModel.passwordVisibility.observeAsState(initial = false)
+    val repeatPasswordVisibility: Boolean by viewModel.passwordVisibility.observeAsState(initial = false)
 
 
     val fechaDeNacimiento: Calendar by viewModel.fechaDeNacimiento.observeAsState(initial = Calendar.getInstance())
@@ -89,19 +95,21 @@ fun BodyRegistro(modifier: Modifier, viewModel: RegistroViewModel) {
         )
 
         Spacer(modifier = Modifier.size(30.dp))
-        RegistroPassword(password){ viewModel.onRegistroChanged(email,it, userName,repetirPassword) }
+
+
+        RegistroPassword(password,passwordVisibility, onTextChanged={ viewModel.onRegistroChanged(email,it, userName,repetirPassword) },viewModel=viewModel)
         Spacer(modifier = Modifier.size(30.dp))
-        RepetirPassword(repetirPassword) { viewModel.onRegistroChanged(email, password, userName, it) }
+        RepetirPassword(repetirPassword, repeatPasswordVisibility, onTextChanged={ viewModel.onRegistroChanged(email, password, userName, it) },viewModel=viewModel)
         Spacer(modifier = Modifier.size(30.dp))
-        BotonRegistro()
+        BotonRegistro(registroEnable)
     }
 }
 
 @Composable
-fun BotonRegistro() {
+fun BotonRegistro(registroEnable: Boolean) {
     Button(
         onClick = {},
-        enabled = true,
+        enabled = registroEnable,
         modifier = Modifier.fillMaxWidth().padding(6.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = Color(0xFF5DCF14),
@@ -117,11 +125,11 @@ fun BotonRegistro() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RepetirPassword(password:String,onTextChanged: (String) -> Unit) {
+fun RepetirPassword(password:String,passwordVisibility: Boolean,onTextChanged: (String) -> Unit , viewModel: RegistroViewModel) {
     TextField(
         value = password,
         onValueChange = { onTextChanged(it) },
-        placeholder = { Text(text = "Repetir Contraseña") },
+        label = { Text(text = "Repetir Contraseña") },
         modifier = Modifier.fillMaxWidth(),
         colors = TextFieldDefaults.textFieldColors(
             textColor = Color(0xFFB2B2B2),
@@ -131,14 +139,14 @@ fun RepetirPassword(password:String,onTextChanged: (String) -> Unit) {
         ),
         maxLines = 1,
         singleLine = true,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),visualTransformation = PasswordVisualTransformation()
-        /* trailingIcon = {
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+        trailingIcon = {
              val icon = if (passwordVisibility) {
                  Icons.Filled.VisibilityOff
              } else {
                  Icons.Filled.Visibility
              }
-             IconButton(onClick = { viewModel.togglePasswordVisibility(passwordVisibility) }) {
+             IconButton(onClick = { viewModel.toggleRepeatPasswordVisibility(passwordVisibility) }) {
                  Icon(imageVector = icon, contentDescription = "Show password")
              }
          },
@@ -146,7 +154,7 @@ fun RepetirPassword(password:String,onTextChanged: (String) -> Unit) {
              VisualTransformation.None
          } else {
              PasswordVisualTransformation()
-         }*/
+         }
     )
 
 }
@@ -155,6 +163,7 @@ fun RepetirPassword(password:String,onTextChanged: (String) -> Unit) {
 @Composable
 fun FechaNacimiento(dateOfBirth: Calendar ,onDateSelected: (Calendar) -> Unit) {
     var showDatePickerDialog by remember { mutableStateOf(false) }
+
 
     Column {
         // Campo de texto para mostrar la fecha de nacimiento actual
@@ -230,12 +239,12 @@ fun DatePickerDialog(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegistroPassword(password: String,onTextChanged: (String) -> Unit) {
+fun RegistroPassword(password: String,passwordVisibility: Boolean,onTextChanged: (String) -> Unit , viewModel: RegistroViewModel) {
 
     TextField(
         value = password,
         onValueChange = { onTextChanged(it) },
-        placeholder = { Text(text = "Contraseña") },
+        label = { Text(text = "Contraseña") },
         modifier = Modifier.fillMaxWidth(),
         colors = TextFieldDefaults.textFieldColors(
             textColor = Color(0xFFB2B2B2),
@@ -246,8 +255,8 @@ fun RegistroPassword(password: String,onTextChanged: (String) -> Unit) {
         maxLines = 1,
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-        visualTransformation = PasswordVisualTransformation()
-       /* trailingIcon = {
+
+      trailingIcon = {
             val icon = if (passwordVisibility) {
                 Icons.Filled.VisibilityOff
             } else {
@@ -261,7 +270,7 @@ fun RegistroPassword(password: String,onTextChanged: (String) -> Unit) {
             VisualTransformation.None
         } else {
             PasswordVisualTransformation()
-        }*/
+        }
     )
 }
 
@@ -272,7 +281,7 @@ fun RegistroNombreUsuario(userName :String, onTextChanged: (String) -> Unit)  {
         value = userName,
         onValueChange = { onTextChanged(it) },
         modifier = Modifier.fillMaxWidth(),
-        placeholder = { Text(text = "Nombre de Usuario") },
+        label = { Text(text = "Nombre de Usuario") },
         maxLines = 1,
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
@@ -292,7 +301,7 @@ fun RegistroEmail(email: String, onTextChanged: (String) -> Unit) {
         value = email,
         onValueChange = {  onTextChanged(it)},
         modifier = Modifier.fillMaxWidth(),
-        placeholder = { Text(text = "Email") },
+        label = { Text(text = "Email") },
         maxLines = 1,
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
