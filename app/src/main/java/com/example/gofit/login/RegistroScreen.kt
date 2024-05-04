@@ -30,8 +30,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.FocusState
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -53,14 +59,14 @@ fun RegistroScreen(viewModel: RegistroViewModel, navigationController: NavHostCo
 
     ) {
         HeaderRegistro(Modifier.align(Alignment.TopEnd))
-        BodyRegistro(Modifier.align(Alignment.TopCenter),viewModel)
+        BodyRegistro(Modifier.align(Alignment.TopCenter), viewModel)
         FooterRegistro(Modifier.align(Alignment.BottomCenter))
     }
 
 }
 
 @Composable
-fun FooterRegistro(modifier:Modifier) {
+fun FooterRegistro(modifier: Modifier) {
     Spacer(modifier = Modifier.size(60.dp))
 }
 
@@ -68,6 +74,7 @@ fun FooterRegistro(modifier:Modifier) {
 fun HeaderRegistro(align: Modifier) {
 
 }
+
 @Composable
 fun BodyRegistro(modifier: Modifier, viewModel: RegistroViewModel) {
     val email: String by viewModel.email.observeAsState(initial = "")
@@ -77,15 +84,27 @@ fun BodyRegistro(modifier: Modifier, viewModel: RegistroViewModel) {
     val registroEnable: Boolean by viewModel.registroEnable.observeAsState(initial = false)
     val passwordVisibility: Boolean by viewModel.passwordVisibility.observeAsState(initial = false)
     val repeatPasswordVisibility: Boolean by viewModel.passwordVisibility.observeAsState(initial = false)
+    val emailError: String? by viewModel.emailError.observeAsState(initial = null)
 
 
     val fechaDeNacimiento: Calendar by viewModel.fechaDeNacimiento.observeAsState(initial = Calendar.getInstance())
 
-    Column(modifier=modifier) {
+    Column(modifier = modifier) {
         Spacer(modifier = Modifier.size(180.dp))
-        RegistroEmail(email) { viewModel.onRegistroChanged(it,password, userName,repetirPassword) }
+        RegistroEmail(
+            email,
+            { viewModel.onRegistroChanged(it, password, userName, repetirPassword) },
+            viewModel
+        )
         Spacer(modifier = Modifier.size(30.dp))
-        RegistroNombreUsuario(userName){viewModel.onRegistroChanged(email, password, it,repetirPassword)}
+        RegistroNombreUsuario(userName) {
+            viewModel.onRegistroChanged(
+                email,
+                password,
+                it,
+                repetirPassword
+            )
+        }
         Spacer(modifier = Modifier.size(30.dp))
         FechaNacimiento(
             dateOfBirth = fechaDeNacimiento,
@@ -97,9 +116,19 @@ fun BodyRegistro(modifier: Modifier, viewModel: RegistroViewModel) {
         Spacer(modifier = Modifier.size(30.dp))
 
 
-        RegistroPassword(password,passwordVisibility, onTextChanged={ viewModel.onRegistroChanged(email,it, userName,repetirPassword) },viewModel=viewModel)
+        RegistroPassword(
+            password,
+            passwordVisibility,
+            onTextChanged = { viewModel.onRegistroChanged(email, it, userName, repetirPassword) },
+            viewModel = viewModel
+        )
         Spacer(modifier = Modifier.size(30.dp))
-        RepetirPassword(repetirPassword, repeatPasswordVisibility, onTextChanged={ viewModel.onRegistroChanged(email, password, userName, it) },viewModel=viewModel)
+        RepetirPassword(
+            repetirPassword,
+            repeatPasswordVisibility,
+            onTextChanged = { viewModel.onRegistroChanged(email, password, userName, it) },
+            viewModel = viewModel
+        )
         Spacer(modifier = Modifier.size(30.dp))
         BotonRegistro(registroEnable)
     }
@@ -110,7 +139,9 @@ fun BotonRegistro(registroEnable: Boolean) {
     Button(
         onClick = {},
         enabled = registroEnable,
-        modifier = Modifier.fillMaxWidth().padding(6.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(6.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = Color(0xFF5DCF14),
             disabledContainerColor = Color(0xFF5DCF14),
@@ -125,43 +156,65 @@ fun BotonRegistro(registroEnable: Boolean) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RepetirPassword(password:String,passwordVisibility: Boolean,onTextChanged: (String) -> Unit , viewModel: RegistroViewModel) {
+fun RepetirPassword(
+    password: String,
+    passwordVisibility: Boolean,
+    onTextChanged: (String) -> Unit,
+    viewModel: RegistroViewModel
+) {
+    var isFocused by remember { mutableStateOf(false) }
+    val borderColor =
+        if (!viewModel.isValidPassword(password) && password.isNotEmpty() && !isFocused) Color.Red else Color(
+            0xFFFAFAFA
+        )
     TextField(
         value = password,
         onValueChange = { onTextChanged(it) },
         label = { Text(text = "Repetir Contraseña") },
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .onFocusChanged {
+                isFocused = it.isFocused
+                viewModel.setEmailFocus(isFocused)
+            },
         colors = TextFieldDefaults.textFieldColors(
             textColor = Color(0xFFB2B2B2),
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent,
+            focusedIndicatorColor = borderColor,
+            unfocusedIndicatorColor = borderColor,
             containerColor = Color(0xFFFAFAFA)
         ),
         maxLines = 1,
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
         trailingIcon = {
-             val icon = if (passwordVisibility) {
-                 Icons.Filled.VisibilityOff
-             } else {
-                 Icons.Filled.Visibility
-             }
-             IconButton(onClick = { viewModel.toggleRepeatPasswordVisibility(passwordVisibility) }) {
-                 Icon(imageVector = icon, contentDescription = "Show password")
-             }
-         },
-         visualTransformation = if (passwordVisibility) {
-             VisualTransformation.None
-         } else {
-             PasswordVisualTransformation()
-         }
+            val icon = if (passwordVisibility) {
+                Icons.Filled.VisibilityOff
+            } else {
+                Icons.Filled.Visibility
+            }
+            IconButton(onClick = { viewModel.toggleRepeatPasswordVisibility(passwordVisibility) }) {
+                Icon(imageVector = icon, contentDescription = "Show password")
+            }
+        },
+        visualTransformation = if (passwordVisibility) {
+            VisualTransformation.None
+        } else {
+            PasswordVisualTransformation()
+        }
     )
+    if (!isFocused && password.length < 6 && password.isNotEmpty()) {
+        Text(
+            text = "La contraseña debe tener al menos 6 caracteres",
+            style = TextStyle(color = Color.Red),
+            modifier = Modifier.padding(start = 8.dp)
+        )
+    }
 
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FechaNacimiento(dateOfBirth: Calendar ,onDateSelected: (Calendar) -> Unit) {
+fun FechaNacimiento(dateOfBirth: Calendar, onDateSelected: (Calendar) -> Unit) {
     var showDatePickerDialog by remember { mutableStateOf(false) }
 
 
@@ -232,31 +285,40 @@ fun DatePickerDialog(
 }
 
 
-
-
-
-
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegistroPassword(password: String,passwordVisibility: Boolean,onTextChanged: (String) -> Unit , viewModel: RegistroViewModel) {
-
+fun RegistroPassword(
+    password: String,
+    passwordVisibility: Boolean,
+    onTextChanged: (String) -> Unit,
+    viewModel: RegistroViewModel
+) {
+    var isFocused by remember { mutableStateOf(false) }
+    val borderColor =
+        if (!viewModel.isValidPassword(password) && password.isNotEmpty() && !isFocused) Color.Red else Color(
+            0xFFFAFAFA
+        )
     TextField(
         value = password,
         onValueChange = { onTextChanged(it) },
         label = { Text(text = "Contraseña") },
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .onFocusChanged {
+                isFocused = it.isFocused
+                viewModel.setEmailFocus(isFocused)
+            },
         colors = TextFieldDefaults.textFieldColors(
             textColor = Color(0xFFB2B2B2),
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent,
+            focusedIndicatorColor = borderColor,
+            unfocusedIndicatorColor = borderColor,
             containerColor = Color(0xFFFAFAFA)
         ),
         maxLines = 1,
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
 
-      trailingIcon = {
+        trailingIcon = {
             val icon = if (passwordVisibility) {
                 Icons.Filled.VisibilityOff
             } else {
@@ -271,12 +333,20 @@ fun RegistroPassword(password: String,passwordVisibility: Boolean,onTextChanged:
         } else {
             PasswordVisualTransformation()
         }
+
     )
+    if (!isFocused && password.length < 6 && password.isNotEmpty()) {
+        Text(
+            text = "La contraseña debe tener al menos 6 caracteres",
+            style = TextStyle(color = Color.Red),
+            modifier = Modifier.padding(start = 8.dp)
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegistroNombreUsuario(userName :String, onTextChanged: (String) -> Unit)  {
+fun RegistroNombreUsuario(userName: String, onTextChanged: (String) -> Unit) {
     TextField(
         value = userName,
         onValueChange = { onTextChanged(it) },
@@ -296,23 +366,44 @@ fun RegistroNombreUsuario(userName :String, onTextChanged: (String) -> Unit)  {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegistroEmail(email: String, onTextChanged: (String) -> Unit) {
-    TextField(
-        value = email,
-        onValueChange = {  onTextChanged(it)},
-        modifier = Modifier.fillMaxWidth(),
-        label = { Text(text = "Email") },
-        maxLines = 1,
-        singleLine = true,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-        colors = TextFieldDefaults.textFieldColors(
-            textColor = Color(0xFFB2B2B2),
-            containerColor = Color(0xFFFAFAFA),
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent
+fun RegistroEmail(email: String, onEmailChanged: (String) -> Unit, viewModel: RegistroViewModel) {
+    var isFocused by remember { mutableStateOf(false) }
+    val borderColor =
+        if (!viewModel.isValidEmail(email) && email.isNotEmpty() && !isFocused) Color.Red else Color(
+            0xFFFAFAFA
         )
-    )
 
+    Column {
+        TextField(
+            value = email,
+            onValueChange = { onEmailChanged(it) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .onFocusChanged {
+                    isFocused = it.isFocused
+                    viewModel.setEmailFocus(isFocused)
+                },
+            label = { Text(text = "Email") },
+            maxLines = 1,
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+            colors = TextFieldDefaults.textFieldColors(
+                textColor = Color(0xFFB2B2B2),
+                focusedIndicatorColor = borderColor,
+                unfocusedIndicatorColor = borderColor,
+                containerColor = Color(0xFFFAFAFA)
+            )
+        )
+
+        if (!viewModel.isValidEmail(email) && !isFocused && email.isNotEmpty()) {
+            Text(
+                text = "Email no válido",
+                style = TextStyle(color = Color.Red),
+                modifier = Modifier.padding(start = 8.dp)
+            )
+        }
+    }
 }
+
 
 

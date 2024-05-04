@@ -26,10 +26,20 @@ class RegistroViewModel : ViewModel() {
 
     private val _registroEnable=MutableLiveData<Boolean>()
     val registroEnable: LiveData<Boolean> = _registroEnable
+
     private val _passwordVisibility=MutableLiveData<Boolean>()
     val passwordVisibility: LiveData<Boolean> = _passwordVisibility
+
     private val _repeatPasswordVisibility=MutableLiveData<Boolean>()
     val repeatPasswordVisibility: LiveData<Boolean> = _repeatPasswordVisibility
+
+    private val _emailError = MutableLiveData<String?>()
+    val emailError: LiveData<String?> = _emailError
+
+
+    private val _emailHasFocus = MutableLiveData<Boolean>()
+    val emailHasFocus: LiveData<Boolean> = _emailHasFocus
+
 
 
 
@@ -47,12 +57,15 @@ class RegistroViewModel : ViewModel() {
         _userName.value = userName
 
 
+        val validEmail = isValidEmail(email)
+        if (!validEmail) {
+            _emailError.value = "Email no válido"
+        } else {
+            _emailError.value = null // Reiniciar el mensaje de error si el email es válido
+        }
 
         // Comprobar si todos los campos tienen valores no nulos
         val allFieldsFilled = email.isNotBlank() && password.isNotBlank() && repetirPassword.isNotBlank() && userName.isNotBlank()
-
-        // Comprobar si el correo electrónico es válido
-        val validEmail = isValidEmail(email)
 
         // Comprobar si la contraseña tiene al menos 6 caracteres
         val validPassword = isValidPassword(password)
@@ -60,18 +73,17 @@ class RegistroViewModel : ViewModel() {
         // Comprobar si las dos contraseñas coinciden
         val passwordsMatch = password == repetirPassword
 
-
-
         // Habilitar el botón de registro solo si todas las condiciones se cumplen
         _registroEnable.value = allFieldsFilled && validEmail && validPassword && passwordsMatch
     }
+
 
     fun setFechaDeNacimiento(fecha: Calendar) {
         _fechaDeNacimiento.value = fecha
     }
 
-    private fun isValidEmail(email: String): Boolean= Patterns.EMAIL_ADDRESS.matcher(email).matches()
-    private fun isValidPassword(password: String): Boolean =password.length >= 6
+     fun isValidEmail(email: String): Boolean= Patterns.EMAIL_ADDRESS.matcher(email).matches()
+     fun isValidPassword(password: String): Boolean =password.length >= 6
 
     fun togglePasswordVisibility(passwordVisibility: Boolean) {
         _passwordVisibility.value=!passwordVisibility
@@ -82,5 +94,10 @@ class RegistroViewModel : ViewModel() {
         _repeatPasswordVisibility.value=!passwordVisibility
 
     }
+
+    fun setEmailFocus(hasFocus: Boolean) {
+        _emailHasFocus.value = hasFocus
+    }
+
 }
 

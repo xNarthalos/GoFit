@@ -208,6 +208,7 @@ fun ForgotPassword(modifier: Modifier, navigationController: NavHostController) 
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Password(
     password: String, passwordVisibility: Boolean, onTextChanged: (String) -> Unit,
