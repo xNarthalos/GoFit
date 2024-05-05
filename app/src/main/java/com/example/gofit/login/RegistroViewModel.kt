@@ -37,8 +37,8 @@ class RegistroViewModel : ViewModel() {
     val emailError: LiveData<String?> = _emailError
 
 
-    private val _emailHasFocus = MutableLiveData<Boolean>()
-    val emailHasFocus: LiveData<Boolean> = _emailHasFocus
+    private val _hasFocus = MutableLiveData<Boolean>()
+    val hasFocus: LiveData<Boolean> = _hasFocus
 
 
 
@@ -95,8 +95,8 @@ class RegistroViewModel : ViewModel() {
 
     }
 
-    fun setEmailFocus(hasFocus: Boolean) {
-        _emailHasFocus.value = hasFocus
+    fun setFocus(hasFocus: Boolean) {
+        _hasFocus.value = hasFocus
     }
 
 }

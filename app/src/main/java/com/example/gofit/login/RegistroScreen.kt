@@ -30,13 +30,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.FocusState
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -83,8 +79,8 @@ fun BodyRegistro(modifier: Modifier, viewModel: RegistroViewModel) {
     val userName: String by viewModel.userName.observeAsState(initial = "")
     val registroEnable: Boolean by viewModel.registroEnable.observeAsState(initial = false)
     val passwordVisibility: Boolean by viewModel.passwordVisibility.observeAsState(initial = false)
-    val repeatPasswordVisibility: Boolean by viewModel.passwordVisibility.observeAsState(initial = false)
-    val emailError: String? by viewModel.emailError.observeAsState(initial = null)
+    val repeatPasswordVisibility: Boolean by viewModel.repeatPasswordVisibility.observeAsState(initial = false)
+
 
 
     val fechaDeNacimiento: Calendar by viewModel.fechaDeNacimiento.observeAsState(initial = Calendar.getInstance())
@@ -175,7 +171,7 @@ fun RepetirPassword(
             .fillMaxWidth()
             .onFocusChanged {
                 isFocused = it.isFocused
-                viewModel.setEmailFocus(isFocused)
+                viewModel.setFocus(isFocused)
             },
         colors = TextFieldDefaults.textFieldColors(
             textColor = Color(0xFFB2B2B2),
@@ -306,7 +302,7 @@ fun RegistroPassword(
             .fillMaxWidth()
             .onFocusChanged {
                 isFocused = it.isFocused
-                viewModel.setEmailFocus(isFocused)
+                viewModel.setFocus(isFocused)
             },
         colors = TextFieldDefaults.textFieldColors(
             textColor = Color(0xFFB2B2B2),
@@ -381,7 +377,7 @@ fun RegistroEmail(email: String, onEmailChanged: (String) -> Unit, viewModel: Re
                 .fillMaxWidth()
                 .onFocusChanged {
                     isFocused = it.isFocused
-                    viewModel.setEmailFocus(isFocused)
+                    viewModel.setFocus(isFocused)
                 },
             label = { Text(text = "Email") },
             maxLines = 1,

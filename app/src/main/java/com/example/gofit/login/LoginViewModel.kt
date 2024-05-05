@@ -4,51 +4,78 @@ import android.util.Patterns
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.auth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import java.util.Calendar
 
-class LoginViewModel : ViewModel(){
+class LoginViewModel : ViewModel() {
+  private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
-  private val _email =MutableLiveData<String>()
-    val email: LiveData<String> = _email
+  private val _email = MutableLiveData<String>()
+  val email: LiveData<String> = _email
 
-  private val _password =MutableLiveData<String>()
+  private val _password = MutableLiveData<String>()
   val password: LiveData<String> = _password
 
-  private val _passwordVisibility=MutableLiveData<Boolean>()
+  private val _passwordVisibility = MutableLiveData<Boolean>()
   val passwordVisibility: LiveData<Boolean> = _passwordVisibility
 
-  private val _LoginEnable=MutableLiveData<Boolean>()
+  private val _LoginEnable = MutableLiveData<Boolean>()
   val loginEnable: LiveData<Boolean> = _LoginEnable
 
+  private val _errorMessage = MutableLiveData<String?>()
+  val errorMessage: LiveData<String?> = _errorMessage
 
-  fun onLoginChanged(email :String ,password :String){
-    _email.value=email
-    _password.value=password
-    _LoginEnable.value=isValidEmail(email)&& isValidPassword(password)
+  private val _hasFocus = MutableLiveData<Boolean>()
+  val hasFocus: LiveData<Boolean> = _hasFocus
 
+
+
+  fun onLoginChanged(email: String, password: String) {
+    _email.value = email
+    _password.value = password
+    _LoginEnable.value = isValidEmail(email) && isValidPassword(password)
 
 
   }
 
-  private fun isValidPassword(password: String): Boolean =password.length >= 6
+   fun isValidPassword(password: String): Boolean = password.length >= 6
 
-  private fun isValidEmail(email: String): Boolean= Patterns.EMAIL_ADDRESS.matcher(email).matches()
+   fun isValidEmail(email: String): Boolean = Patterns.EMAIL_ADDRESS.matcher(email).matches()
   fun onLoginSelected() {
 
   }
 
 
-
   fun togglePasswordVisibility(passwordVisibility: Boolean) {
-    _passwordVisibility.value=!passwordVisibility
+    _passwordVisibility.value = !passwordVisibility
 
   }
 
+  fun signInWithEmailAndPassword(email: String, password: String, navController: NavController) {
+    auth.signInWithEmailAndPassword(email, password)
+      .addOnCompleteListener { task ->
+        if (task.isSuccessful) {
+              navController.navigate("Menu")
+        } else {
+          _errorMessage.value = "Por favor, comprueba que el email y la contraseña son los correctos."
+        }
+        }
+      }
 
-
-
+  fun clearErrorMessage() {
+    _errorMessage.value = null
+  }
+  fun setFocus(hasFocus: Boolean) {
+    _hasFocus.value = hasFocus
+  }
 
 }
+
+
 
 
 

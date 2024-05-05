@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
@@ -34,11 +35,16 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -60,8 +66,8 @@ fun LoginScreen(viewModel: LoginViewModel, navigationController: NavHostControll
 
     ) {
         Header(Modifier.align(Alignment.TopEnd))
-        Body(Modifier.align(Alignment.Center),viewModel,navigationController)
-        Footer(Modifier.align(Alignment.BottomCenter),navigationController)
+        Body(Modifier.align(Alignment.Center), viewModel, navigationController)
+        Footer(Modifier.align(Alignment.BottomCenter), navigationController)
     }
 
 }
@@ -88,7 +94,9 @@ fun SingUp(navigationController: NavHostController) {
         Text(text = "¿No tienes una cuenta?", fontSize = 12.sp, color = Color(0xFFB5B5B5))
         Text(
             text = "Registrese aqui.",
-            Modifier.padding(horizontal = 8.dp).clickable { navigationController.navigate("RegistroScreen") },
+            Modifier
+                .padding(horizontal = 8.dp)
+                .clickable { navigationController.navigate("RegistroScreen") },
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
             color = Color(0xFF4EA8E9)
@@ -102,22 +110,35 @@ fun Body(modifier: Modifier, viewModel: LoginViewModel, navigationController: Na
 
     val email: String by viewModel.email.observeAsState(initial = "")
     val password: String by viewModel.password.observeAsState(initial = "")
-    val loginEnable:Boolean by viewModel.loginEnable.observeAsState(initial = false)
+    val loginEnable: Boolean by viewModel.loginEnable.observeAsState(initial = false)
     val passwordVisibility: Boolean by viewModel.passwordVisibility.observeAsState(initial = false)
 
 
     Column(modifier = modifier) {
         ImageLogo(Modifier.align(Alignment.CenterHorizontally))
         Spacer(modifier = Modifier.size(16.dp))
-        Email(email) { viewModel.onLoginChanged(it,password)
-
-        }
+        Email(email, {
+            viewModel.onLoginChanged(it, password)
+        }, viewModel)
         Spacer(modifier = Modifier.size(4.dp))
-        Password(password, passwordVisibility, onTextChanged = { viewModel.onLoginChanged(email, it) }, viewModel = viewModel)
+        Password(
+            password,
+            passwordVisibility,
+            onTextChanged = { viewModel.onLoginChanged(email, it) },
+            viewModel = viewModel
+        )
         Spacer(modifier = Modifier.size(8.dp))
-        ForgotPassword(Modifier.align(Alignment.End),navigationController)
+        ForgotPassword(Modifier.align(Alignment.End), navigationController)
         Spacer(modifier = Modifier.size(16.dp))
-        LoginButton(loginEnable,navigationController){viewModel.onLoginSelected()}
+        LoginButton(
+            isLoginEnabled = loginEnable,
+            navigationController = navigationController,
+            viewModel = viewModel,
+            email = email,
+            password = password,
+            onLoginSelected = viewModel::onLoginSelected
+        )
+
         Spacer(modifier = Modifier.size(16.dp))
         LoginDivider()
         Spacer(modifier = Modifier.size(32.dp))
@@ -177,11 +198,20 @@ fun LoginDivider() {
 fun LoginButton(
     isLoginEnabled: Boolean,
     navigationController: NavHostController,
-    onLoginSelected: () -> Unit
+    onLoginSelected: () -> Unit,
+    viewModel: LoginViewModel,
+    email: String,
+    password: String
 ) {
+    val errorMessage: String? by viewModel.errorMessage.observeAsState()
+
     Button(
-        onClick = {onLoginSelected()
-            navigationController.navigate("Menu") },
+        onClick = {
+            onLoginSelected()
+            if (isLoginEnabled) {
+                viewModel.signInWithEmailAndPassword(email, password, navigationController)
+            }
+        },
         enabled = isLoginEnabled,
         modifier = Modifier.fillMaxWidth(),
         colors = ButtonDefaults.buttonColors(
@@ -193,8 +223,22 @@ fun LoginButton(
     ) {
         Text(text = "Entrar")
     }
-}
 
+    if (errorMessage != null) {
+        AlertDialog(
+            onDismissRequest = { viewModel.clearErrorMessage() },
+            title = { Text(text = "Fallo al iniciar sesion") },
+            text = { Text(errorMessage!!) },
+            confirmButton = {
+                Button(
+                    onClick = { viewModel.clearErrorMessage() }
+                ) {
+                    Text("Aceptar")
+                }
+            }
+        )
+    }
+}
 
 
 @Composable
@@ -214,17 +258,24 @@ fun Password(
     password: String, passwordVisibility: Boolean, onTextChanged: (String) -> Unit,
     viewModel: LoginViewModel
 ) {
-
+    var isFocused by remember { mutableStateOf(false) }
+    val borderColor =
+        if (!viewModel.isValidPassword(password) && password.isNotEmpty() && !isFocused) Color.Red else Color(
+            0xFFFAFAFA
+        )
 
     TextField(
         value = password,
         onValueChange = { onTextChanged(it) },
         placeholder = { Text(text = "Contraseña") },
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().onFocusChanged {
+            isFocused = it.isFocused
+            viewModel.setFocus(isFocused)
+        },
         colors = TextFieldDefaults.textFieldColors(
             textColor = Color(0xFFB2B2B2),
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent,
+            focusedIndicatorColor = borderColor,
+            unfocusedIndicatorColor = borderColor,
             containerColor = Color(0xFFFAFAFA)
         ),
         maxLines = 1,
@@ -246,15 +297,30 @@ fun Password(
             PasswordVisualTransformation()
         }
     )
+    if (!isFocused && password.length < 6 && password.isNotEmpty()) {
+        Text(
+            text = "La contraseña debe tener al menos 6 caracteres",
+            style = TextStyle(color = Color.Red),
+            modifier = Modifier.padding(start = 8.dp)
+        )
+    }
 }
 
 
 @Composable
-fun Email(email: String, onTextChanged: (String) -> Unit) {
+fun Email(email: String, onTextChanged: (String) -> Unit, viewModel: LoginViewModel) {
+    var isFocused by remember { mutableStateOf(false) }
+    val borderColor =
+        if (!viewModel.isValidEmail(email) && email.isNotEmpty() && !isFocused) Color.Red else Color(
+            0xFFFAFAFA
+        )
     TextField(
         value = email,
         onValueChange = { onTextChanged(it) },
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().onFocusChanged {
+            isFocused = it.isFocused
+            viewModel.setFocus(isFocused)
+        },
         placeholder = { Text(text = "Email") },
         maxLines = 1,
         singleLine = true,
@@ -262,10 +328,17 @@ fun Email(email: String, onTextChanged: (String) -> Unit) {
         colors = TextFieldDefaults.textFieldColors(
             textColor = Color(0xFFB2B2B2),
             containerColor = Color(0xFFFAFAFA),
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent
+            focusedIndicatorColor = borderColor,
+            unfocusedIndicatorColor = borderColor
         )
     )
+    if (!isFocused && !viewModel.isValidEmail(email) && email.isNotEmpty()) {
+        Text(
+            text = "El formato del email introducido no es correcto",
+            style = TextStyle(color = Color.Red),
+            modifier = Modifier.padding(start = 8.dp)
+        )
+    }
 }
 
 
