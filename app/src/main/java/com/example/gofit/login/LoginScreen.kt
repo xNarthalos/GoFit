@@ -4,6 +4,10 @@ package com.example.gofit.login
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.credentials.CredentialManager
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,8 +24,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
+
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -53,9 +56,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.gofit.R
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.firebase.auth.GoogleAuthCredential
+import com.google.firebase.auth.GoogleAuthProvider
 
 @Composable
 fun LoginScreen(viewModel: LoginViewModel, navigationController: NavHostController) {
+
+
 
     Box(
         Modifier
@@ -142,25 +153,50 @@ fun Body(modifier: Modifier, viewModel: LoginViewModel, navigationController: Na
         Spacer(modifier = Modifier.size(16.dp))
         LoginDivider()
         Spacer(modifier = Modifier.size(32.dp))
-        SocialLogin()
+        SocialLogin(viewModel,navigationController)
 
     }
 }
 
 @Composable
-fun SocialLogin() {
+fun SocialLogin(viewModel: LoginViewModel, navigationController: NavHostController) {
+    val token="175197824911-25bfjevv9f8gjnmkvj1rugkjjtm3pgj1.apps.googleusercontent.com"
+    val context= LocalContext.current
+    val onClick: () ->Unit= {
+        //val credentialManager= CredentialManager.create(context)
+
+        //val googleIdOption: GetGoogleIdOption
+    }
+    val launcher =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(it.data)
+            try {
+                val account = task.getResult(ApiException::class.java)
+                val credential = GoogleAuthProvider.getCredential(account.idToken, null)
+                viewModel.signInWithGoogle(credential) {
+                    navigationController.navigate("Menu")
+                }
+            } catch (ex: Exception) {
+ Log.d("google", "excepcion al iniciar con google "+ex.localizedMessage)
+            }
+
+        }
     Row(
-        Modifier.fillMaxWidth(),
+        Modifier
+            .fillMaxWidth()
+            .clickable {
+
+            },
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
         Image(
-            painter = painterResource(id = R.drawable.fb),
+            painter = painterResource(id = R.drawable.google),
             contentDescription = "Logo Fb",
             modifier = Modifier.size(16.dp)
         )
         Text(
-            text = "Continua como Alejandro",
+            text = "Inicia sesion con Google",
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(8.dp),
@@ -268,10 +304,12 @@ fun Password(
         value = password,
         onValueChange = { onTextChanged(it) },
         placeholder = { Text(text = "Contraseña") },
-        modifier = Modifier.fillMaxWidth().onFocusChanged {
-            isFocused = it.isFocused
-            viewModel.setFocus(isFocused)
-        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .onFocusChanged {
+                isFocused = it.isFocused
+                viewModel.setFocus(isFocused)
+            },
         colors = TextFieldDefaults.textFieldColors(
             textColor = Color(0xFFB2B2B2),
             focusedIndicatorColor = borderColor,
@@ -283,14 +321,15 @@ fun Password(
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
         trailingIcon = {
             val icon = if (passwordVisibility) {
-                Icons.Filled.VisibilityOff
+                painterResource(id = R.drawable.visibility_off)
             } else {
-                Icons.Filled.Visibility
+                painterResource(id = R.drawable.visibility)
             }
             IconButton(onClick = { viewModel.togglePasswordVisibility(passwordVisibility) }) {
-                Icon(imageVector = icon, contentDescription = "Show password")
+                Icon(painter = icon, contentDescription = "Show password")
             }
-        },
+        }
+        ,
         visualTransformation = if (passwordVisibility) {
             VisualTransformation.None
         } else {
@@ -317,10 +356,12 @@ fun Email(email: String, onTextChanged: (String) -> Unit, viewModel: LoginViewMo
     TextField(
         value = email,
         onValueChange = { onTextChanged(it) },
-        modifier = Modifier.fillMaxWidth().onFocusChanged {
-            isFocused = it.isFocused
-            viewModel.setFocus(isFocused)
-        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .onFocusChanged {
+                isFocused = it.isFocused
+                viewModel.setFocus(isFocused)
+            },
         placeholder = { Text(text = "Email") },
         maxLines = 1,
         singleLine = true,

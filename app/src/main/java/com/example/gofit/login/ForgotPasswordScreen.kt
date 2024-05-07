@@ -43,9 +43,9 @@ fun ForgotPasswordScreen(viewModel: ForgotPasswordViewModel, navigationControlle
 }
 
 @Composable
-fun ButtonForgot(loginButtonEnable: Boolean) {
+fun ButtonForgot(loginButtonEnable: Boolean,email: String, viewModel: ForgotPasswordViewModel) {
     Button(
-        onClick = {},
+        onClick = {viewModel.resetPassword(email)},
         enabled = loginButtonEnable,
         modifier = Modifier
             .fillMaxWidth()
@@ -70,7 +70,7 @@ fun BodyForgot(modifier: Modifier,viewModel: ForgotPasswordViewModel) {
         EmailForgot(email){ viewModel.onForgotPasswordChanged(it) }
 
         Spacer(modifier = Modifier.size(16.dp))
-        ButtonForgot(loginButtonEnable)
+        ButtonForgot(loginButtonEnable,email,viewModel)
     }
 }
 

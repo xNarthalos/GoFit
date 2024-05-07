@@ -12,8 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -42,6 +42,8 @@ import androidx.navigation.NavHostController
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import com.example.gofit.R
+
 
 @Composable
 fun RegistroScreen(viewModel: RegistroViewModel, navigationController: NavHostController) {
@@ -55,7 +57,7 @@ fun RegistroScreen(viewModel: RegistroViewModel, navigationController: NavHostCo
 
     ) {
         HeaderRegistro(Modifier.align(Alignment.TopEnd))
-        BodyRegistro(Modifier.align(Alignment.TopCenter), viewModel)
+        BodyRegistro(Modifier.align(Alignment.TopCenter), viewModel,navigationController)
         FooterRegistro(Modifier.align(Alignment.BottomCenter))
     }
 
@@ -72,7 +74,7 @@ fun HeaderRegistro(align: Modifier) {
 }
 
 @Composable
-fun BodyRegistro(modifier: Modifier, viewModel: RegistroViewModel) {
+fun BodyRegistro(modifier: Modifier, viewModel: RegistroViewModel,navigationController: NavHostController) {
     val email: String by viewModel.email.observeAsState(initial = "")
     val password: String by viewModel.password.observeAsState(initial = "")
     val repetirPassword: String by viewModel.repetirPassword.observeAsState(initial = "")
@@ -126,14 +128,15 @@ fun BodyRegistro(modifier: Modifier, viewModel: RegistroViewModel) {
             viewModel = viewModel
         )
         Spacer(modifier = Modifier.size(30.dp))
-        BotonRegistro(registroEnable)
+        BotonRegistro(registroEnable,email,password,viewModel,navigationController)
     }
 }
 
 @Composable
-fun BotonRegistro(registroEnable: Boolean) {
+fun BotonRegistro(registroEnable: Boolean,email :String , password: String, viewModel: RegistroViewModel,navigationController: NavHostController ) {
     Button(
-        onClick = {},
+        onClick = {viewModel.registro(email,password)
+                   navigationController.navigate("Menu")},
         enabled = registroEnable,
         modifier = Modifier
             .fillMaxWidth()
@@ -184,14 +187,15 @@ fun RepetirPassword(
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
         trailingIcon = {
             val icon = if (passwordVisibility) {
-                Icons.Filled.VisibilityOff
+                painterResource(id = R.drawable.visibility_off)
             } else {
-                Icons.Filled.Visibility
+                painterResource(id = R.drawable.visibility)
             }
             IconButton(onClick = { viewModel.toggleRepeatPasswordVisibility(passwordVisibility) }) {
-                Icon(imageVector = icon, contentDescription = "Show password")
+                Icon(painter = icon, contentDescription = "Show password")
             }
-        },
+        }
+        ,
         visualTransformation = if (passwordVisibility) {
             VisualTransformation.None
         } else {
@@ -316,14 +320,15 @@ fun RegistroPassword(
 
         trailingIcon = {
             val icon = if (passwordVisibility) {
-                Icons.Filled.VisibilityOff
+                painterResource(id = R.drawable.visibility_off)
             } else {
-                Icons.Filled.Visibility
+                painterResource(id = R.drawable.visibility)
             }
-            IconButton(onClick = { viewModel.togglePasswordVisibility(passwordVisibility) }) {
-                Icon(imageVector = icon, contentDescription = "Show password")
+            IconButton(onClick = { viewModel.toggleRepeatPasswordVisibility(passwordVisibility) }) {
+                Icon(painter = icon, contentDescription = "Show password")
             }
-        },
+        }
+        ,
         visualTransformation = if (passwordVisibility) {
             VisualTransformation.None
         } else {
