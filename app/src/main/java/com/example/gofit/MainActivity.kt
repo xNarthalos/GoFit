@@ -1,6 +1,8 @@
 package com.example.gofit
 
+import Menu
 import android.os.Bundle
+
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,7 +20,6 @@ import com.example.gofit.login.ForgotPasswordScreen
 import com.example.gofit.login.ForgotPasswordViewModel
 import com.example.gofit.login.LoginScreen
 import com.example.gofit.login.LoginViewModel
-import com.example.gofit.login.Menu
 import com.example.gofit.login.RegistroScreen
 import com.example.gofit.login.RegistroViewModel
 import com.example.gofit.ui.theme.GoFitTheme
