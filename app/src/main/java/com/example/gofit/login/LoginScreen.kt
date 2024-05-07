@@ -4,7 +4,6 @@ package com.example.gofit.login
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.credentials.CredentialManager
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -24,7 +23,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -57,15 +55,14 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.gofit.R
 import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
-import com.google.firebase.auth.GoogleAuthCredential
+
 import com.google.firebase.auth.GoogleAuthProvider
+
 
 @Composable
 fun LoginScreen(viewModel: LoginViewModel, navigationController: NavHostController) {
-
 
 
     Box(
@@ -153,20 +150,17 @@ fun Body(modifier: Modifier, viewModel: LoginViewModel, navigationController: Na
         Spacer(modifier = Modifier.size(16.dp))
         LoginDivider()
         Spacer(modifier = Modifier.size(32.dp))
-        SocialLogin(viewModel,navigationController)
+        SocialLogin(viewModel, navigationController)
 
     }
 }
 
+@SuppressLint("NewApi")
 @Composable
 fun SocialLogin(viewModel: LoginViewModel, navigationController: NavHostController) {
-    val token="175197824911-25bfjevv9f8gjnmkvj1rugkjjtm3pgj1.apps.googleusercontent.com"
-    val context= LocalContext.current
-    val onClick: () ->Unit= {
-        //val credentialManager= CredentialManager.create(context)
 
-        //val googleIdOption: GetGoogleIdOption
-    }
+    val context = LocalContext.current
+
     val launcher =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) {
             val task = GoogleSignIn.getSignedInAccountFromIntent(it.data)
@@ -177,7 +171,7 @@ fun SocialLogin(viewModel: LoginViewModel, navigationController: NavHostControll
                     navigationController.navigate("Menu")
                 }
             } catch (ex: Exception) {
- Log.d("google", "excepcion al iniciar con google "+ex.localizedMessage)
+                Log.d("google", "excepcion al iniciar con google " + ex.localizedMessage)
             }
 
         }
@@ -185,7 +179,14 @@ fun SocialLogin(viewModel: LoginViewModel, navigationController: NavHostControll
         Modifier
             .fillMaxWidth()
             .clickable {
+                val opciones = GoogleSignInOptions
+                    .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                    .requestIdToken("175197824911-25bfjevv9f8gjnmkvj1rugkjjtm3pgj1.apps.googleusercontent.com")
+                    .requestEmail()
+                    .build()
 
+                val googleSignInCliente= GoogleSignIn.getClient(context,opciones)
+                launcher.launch(googleSignInCliente.signInIntent)
             },
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
@@ -328,8 +329,7 @@ fun Password(
             IconButton(onClick = { viewModel.togglePasswordVisibility(passwordVisibility) }) {
                 Icon(painter = icon, contentDescription = "Show password")
             }
-        }
-        ,
+        },
         visualTransformation = if (passwordVisibility) {
             VisualTransformation.None
         } else {
