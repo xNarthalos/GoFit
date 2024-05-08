@@ -23,19 +23,24 @@ import com.example.gofit.login.LoginViewModel
 import com.example.gofit.login.RegistroScreen
 import com.example.gofit.login.RegistroViewModel
 import com.example.gofit.ui.theme.GoFitTheme
+import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val auth = FirebaseAuth.getInstance()
+        val currentUser = auth.currentUser
+
+        val startDestination = if (currentUser != null) "Menu" else "LoginScreen"
         setContent {
             GoFitTheme {
-                // A surface container using the 'background' color from the theme
+
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val navigationController= rememberNavController()
-                   NavHost(navController = navigationController, startDestination = "LoginScreen"){
+                   NavHost(navController = navigationController, startDestination = startDestination){
                        composable("LoginScreen"){ LoginScreen(viewModel =LoginViewModel(),navigationController )
                        }
 
@@ -50,21 +55,5 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun GreetingPreview() {
-    GoFitTheme {
-        Greeting("Android")
     }
 }
