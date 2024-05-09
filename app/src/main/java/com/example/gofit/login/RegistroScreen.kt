@@ -163,7 +163,7 @@ fun RepetirPassword(
 ) {
     var isFocused by remember { mutableStateOf(false) }
     val borderColor =
-        if (!viewModel.isValidPassword(password) && password.isNotEmpty() && !isFocused) Color.Red else Color(
+        if (viewModel.password!=viewModel.passwordVisibility && password.isNotEmpty()&& !isFocused) Color.Red else Color(
             0xFFFAFAFA
         )
     TextField(
@@ -202,9 +202,9 @@ fun RepetirPassword(
             PasswordVisualTransformation()
         }
     )
-    if (!isFocused && password.length < 6 && password.isNotEmpty()) {
+    if (viewModel.password!=viewModel.passwordVisibility && password.isNotEmpty()) {
         Text(
-            text = "La contraseña debe tener al menos 6 caracteres",
+            text = "Las contraseñas no coinciden",
             style = TextStyle(color = Color.Red),
             modifier = Modifier.padding(start = 8.dp)
         )
