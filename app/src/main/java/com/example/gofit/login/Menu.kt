@@ -1,13 +1,9 @@
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -19,7 +15,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.gofit.R
+import com.example.gofit.login.Entrenamiento
+import com.example.gofit.login.Inicio
+import com.example.gofit.login.Perfil
 import com.google.firebase.auth.FirebaseAuth
 
 
@@ -27,29 +29,28 @@ import com.google.firebase.auth.FirebaseAuth
 @Composable
 fun Menu(navigationController: NavHostController) {
     val auth = FirebaseAuth.getInstance()
+    val innerNavController = rememberNavController()
 
     Scaffold(
         topBar = {
-            MyTopAppBar(onClickIcon = {}, onClickDrawer = {}, onSignOut = { signOutUser(auth, navigationController) })
+            MyTopAppBar(
+                onClickIcon = {},
+                onClickDrawer = {},
+                onSignOut = { signOutUser(auth, navigationController) }
+            )
         },
         bottomBar = {
-            MyBottomNavigation()
+            MyBottomNavigation(innerNavController)
         }
     ) { innerPadding ->
-        Column(
-            Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(8.dp)
-                .background(Color.White)
+        NavHost(
+            navController = innerNavController,
+            startDestination = "Home",
+            Modifier.padding(innerPadding)
         ) {
-            MyCard()
-            Spacer(modifier = Modifier.height(8.dp))
-            MyCard()
-            Spacer(modifier = Modifier.height(8.dp))
-            MyCard()
-            Spacer(modifier = Modifier.height(8.dp))
-            MyCard()
+            composable("Home") { Inicio() }
+            composable("Entrenamiento") { Entrenamiento() }
+            composable("Perfil") { Perfil() }
         }
     }
 }
@@ -92,31 +93,42 @@ fun MyTopAppBar(
 }
 
 @Composable
-fun MyBottomNavigation() {
+fun MyBottomNavigation(navigationController: NavHostController) {
     var index by remember { mutableStateOf(0) }
-    NavigationBar(containerColor = Color(0xFF5DCF14) ) {
-        NavigationBarItem(selected = index == 0, onClick = { index = 0 }, icon = {
-            Icon(
-                imageVector = Icons.Default.Home,
-                contentDescription = "Inicio",
-                tint = Color.White
-
-            )
-        }, label = { Text(text = "Inicio") })
-        NavigationBarItem(selected = index == 1, onClick = { index = 1 }, icon = {
-            Icon(
-                painter = painterResource(id = R.drawable.entrenamiento),
-                contentDescription = "Entrenamiento",
-                tint = Color.White
-            )
-        }, label = { Text(text = "Entrenamiento") })
-        NavigationBarItem(selected = index == 2, onClick = { index = 2 }, icon = {
-            Icon(
-                imageVector = Icons.Default.Person,
-                contentDescription = "Perfil",
-                tint = Color.White
-            )
-        }, label = { Text(text = "Perfil") })
+    NavigationBar(containerColor = Color(0xFF5DCF14)) {
+        NavigationBarItem(
+            selected = index == 0,
+            onClick = {
+                index = 0
+                navigationController.navigate("Home")
+            },
+            icon = {
+                Icon(imageVector = Icons.Default.Home, contentDescription = "Inicio", tint = Color.White)
+            },
+            label = { Text(text = "Inicio") }
+        )
+        NavigationBarItem(
+            selected = index == 1,
+            onClick = {
+                index = 1
+                navigationController.navigate("Entrenamiento")
+            },
+            icon = {
+                Icon(painter = painterResource(id = R.drawable.entrenamiento), contentDescription = "Entrenamiento", tint = Color.White)
+            },
+            label = { Text(text = "Entrenamiento") }
+        )
+        NavigationBarItem(
+            selected = index == 2,
+            onClick = {
+                index = 2
+                navigationController.navigate("Perfil")
+            },
+            icon = {
+                Icon(imageVector = Icons.Default.Person, contentDescription = "Perfil", tint = Color.White)
+            },
+            label = { Text(text = "Perfil") }
+        )
     }
 }
 
