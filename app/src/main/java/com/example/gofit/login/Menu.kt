@@ -49,7 +49,7 @@ fun Menu(navigationController: NavHostController) {
             Modifier.padding(innerPadding)
         ) {
             composable("Home") { Inicio() }
-            composable("Entrenamiento") { Entrenamiento() }
+            composable("Ruta") { Entrenamiento() }
             composable("Perfil") { Perfil() }
         }
     }
@@ -111,12 +111,12 @@ fun MyBottomNavigation(navigationController: NavHostController) {
             selected = index == 1,
             onClick = {
                 index = 1
-                navigationController.navigate("Entrenamiento")
+                navigationController.navigate("Ruta")
             },
             icon = {
                 Icon(painter = painterResource(id = R.drawable.entrenamiento), contentDescription = "Entrenamiento", tint = Color.White)
             },
-            label = { Text(text = "Entrenamiento") }
+            label = { Text(text = "Ruta") }
         )
         NavigationBarItem(
             selected = index == 2,
