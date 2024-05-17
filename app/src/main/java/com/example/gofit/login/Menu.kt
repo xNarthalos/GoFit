@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.gofit.R
 import com.example.gofit.login.Entrenamiento
@@ -33,7 +34,16 @@ fun Menu(navigationController: NavHostController) {
 
     Scaffold(
         topBar = {
+            val currentBackStackEntry by innerNavController.currentBackStackEntryAsState()
+            val currentRoute = currentBackStackEntry?.destination?.route ?: "GoFit"
+            val title = when (currentRoute) {
+                "Ruta" -> "GoFit - Entrenamiento"
+                "Perfil" -> "GoFit - Perfil"
+                "Home" -> "GoFit - Inicio"
+                else -> "GoFit"
+            }
             MyTopAppBar(
+                title = title,
                 onClickIcon = {},
                 onClickDrawer = {},
                 onSignOut = { signOutUser(auth, navigationController) }
@@ -56,9 +66,11 @@ fun Menu(navigationController: NavHostController) {
 }
 
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyTopAppBar(
+    title: String,
     onClickIcon: () -> Unit,
     onClickDrawer: () -> Unit,
     onSignOut: () -> Unit
@@ -66,7 +78,7 @@ fun MyTopAppBar(
     val menuExpanded = remember { mutableStateOf(false) }
 
     TopAppBar(
-        title = { Text(text = "GoFit") },
+        title = { Text(text = title) },
         colors = TopAppBarDefaults.smallTopAppBarColors(
             containerColor = Color(0xFF5DCF14),
             titleContentColor = Color.White,
@@ -75,7 +87,7 @@ fun MyTopAppBar(
             IconButton(onClick = { menuExpanded.value = true }) {
                 Icon(
                     imageVector = Icons.Filled.MoreVert,
-                    contentDescription = "Options",
+                    contentDescription = "Opciones",
                     tint = Color.White
                 )
             }
@@ -86,11 +98,12 @@ fun MyTopAppBar(
                 DropdownMenuItem(onClick = {
                     onSignOut()
                     menuExpanded.value = false
-                }, text = { Text("Cerra Sesion") })
+                }, text = { Text("Cerrar Sesión") })
             }
         }
     )
 }
+
 
 @Composable
 fun MyBottomNavigation(navigationController: NavHostController) {
