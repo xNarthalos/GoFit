@@ -70,20 +70,21 @@ class RegistroViewModel : ViewModel() {
         if (!validEmail) {
             _emailError.value = "Email no válido"
         } else {
-            _emailError.value = null // Reiniciar el mensaje de error si el email es válido
+            // Reiniciamos el mensaje de error si el email es válido
+            _emailError.value = null
         }
 
-        // Comprobar si todos los campos tienen valores no nulos
+        // Comprobamos si todos los campos tienen valores no nulos
         val allFieldsFilled =
             email.isNotBlank() && password.isNotBlank() && repetirPassword.isNotBlank() && userName.isNotBlank()
 
-        // Comprobar si la contraseña tiene al menos 6 caracteres
+        // Comprobamos si la contraseña tiene al menos 6 caracteres
         val validPassword = isValidPassword(password)
 
-        // Comprobar si las dos contraseñas coinciden
+        // Comprobamos si las dos contraseñas coinciden
         val passwordsMatch = password == repetirPassword
 
-        // Habilitar el botón de registro solo si todas las condiciones se cumplen
+        // Habilitamos el botón de registro solo si todas las condiciones se cumplen
         _registroEnable.value = allFieldsFilled && validEmail && validPassword && passwordsMatch
     }
 
@@ -111,25 +112,28 @@ class RegistroViewModel : ViewModel() {
     }
 
     fun registro(email: String, password: String) {
-
         auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->
             if (task.isSuccessful) {
-          guardarDatosUsuario()
+                val user = auth.currentUser
+                user?.let {
+                    guardarDatosUsuario(it.uid)
+                }
             }
         }
-
     }
-    fun guardarDatosUsuario(){
-        val email=_email.value
-        val usuario=_userName.value
-        val fechaDeNacimiento=_fechaDeNacimiento.value
 
-        val datosUsuario= hashMapOf(
+    fun guardarDatosUsuario(uid: String) {
+        val email = _email.value
+        val usuario = _userName.value
+        val fechaDeNacimiento = _fechaDeNacimiento.value
+
+        val datosUsuario = hashMapOf(
             "email" to email,
             "usuario" to usuario,
             "fechaDeNacimiento" to fechaDeNacimiento
         )
-        db.collection("usuarios").add(datosUsuario)
+        db.collection("usuarios").document(uid).set(datosUsuario)
+
     }
 }
 

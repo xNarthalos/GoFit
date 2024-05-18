@@ -11,6 +11,7 @@ import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
 import java.util.Calendar
@@ -73,15 +74,39 @@ class LoginViewModel : ViewModel() {
         try {
             auth.signInWithCredential(credential).addOnCompleteListener { task ->
                 if (task.isSuccessful) {
+                    val user = auth.currentUser
+                    user?.let {
+                        guardarDatosUsuario(it.uid, it.email, it.displayName)
+                    }
                     Log.d("GoFit", "Logeado con google")
                     home()
                 }
             }
-                .addOnFailureListener {    Log.d("GoFit", "Fallo al logear con google") }
-        }catch (ex :Exception ){
+                .addOnFailureListener {
+                    Log.d("GoFit", "Fallo al logear con google")
+                }
+        } catch (ex: Exception) {
             Log.d("GoFit", "Excepcion al logear con Google " + ex.localizedMessage)
+        }
+    }
 
-        }        }
+
+    private fun guardarDatosUsuario(uid: String, email: String?, displayName: String?) {
+        val db = FirebaseFirestore.getInstance()
+        val datosUsuario = hashMapOf(
+            "email" to email,
+            "usuario" to displayName,
+            "fechaDeNacimiento" to null
+        )
+        db.collection("usuarios").document(uid).set(datosUsuario)
+            .addOnSuccessListener {
+                Log.d("GoFit", "Datos del usuario guardados correctamente")
+            }
+            .addOnFailureListener { e ->
+                Log.e("GoFit", "Error al guardar los datos del usuario", e)
+            }
+    }
+
     fun clearErrorMessage() {
         _errorMessage.value = null
     }

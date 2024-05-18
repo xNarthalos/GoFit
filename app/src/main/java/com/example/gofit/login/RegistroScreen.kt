@@ -157,15 +157,16 @@ fun BotonRegistro(registroEnable: Boolean,email :String , password: String, view
 @Composable
 fun RepetirPassword(
     password: String,
-    passwordVisibility: Boolean,
+    repeatPasswordVisibility: Boolean,
     onTextChanged: (String) -> Unit,
     viewModel: RegistroViewModel
 ) {
     var isFocused by remember { mutableStateOf(false) }
     val borderColor =
-        if (viewModel.password!=viewModel.passwordVisibility && password.isNotEmpty()&& !isFocused) Color.Red else Color(
+        if (password != viewModel.password.value && password.isNotEmpty() && !isFocused) Color.Red else Color(
             0xFFFAFAFA
         )
+
     TextField(
         value = password,
         onValueChange = { onTextChanged(it) },
@@ -186,31 +187,31 @@ fun RepetirPassword(
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
         trailingIcon = {
-            val icon = if (passwordVisibility) {
+            val icon = if (repeatPasswordVisibility) {
                 painterResource(id = R.drawable.visibility_off)
             } else {
                 painterResource(id = R.drawable.visibility)
             }
-            IconButton(onClick = { viewModel.toggleRepeatPasswordVisibility(passwordVisibility) }) {
+            IconButton(onClick = { viewModel.toggleRepeatPasswordVisibility(repeatPasswordVisibility) }) {
                 Icon(painter = icon, contentDescription = "Show password")
             }
-        }
-        ,
-        visualTransformation = if (passwordVisibility) {
+        },
+        visualTransformation = if (repeatPasswordVisibility) {
             VisualTransformation.None
         } else {
             PasswordVisualTransformation()
         }
     )
-    if (viewModel.password!=viewModel.passwordVisibility && password.isNotEmpty()) {
+
+    if (!isFocused && password != viewModel.password.value && password.isNotEmpty()) {
         Text(
             text = "Las contraseñas no coinciden",
             style = TextStyle(color = Color.Red),
             modifier = Modifier.padding(start = 8.dp)
         )
     }
-
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -262,7 +263,7 @@ fun DatePickerDialog(
     val context = LocalContext.current
     val calendar by remember { mutableStateOf(initialDate) }
 
-    // DatePickerDialog
+
     DatePickerDialog(
         context,
         { _, year, month, dayOfMonth ->
@@ -273,13 +274,13 @@ fun DatePickerDialog(
         calendar.get(Calendar.MONTH),
         calendar.get(Calendar.DAY_OF_MONTH)
     ).apply {
-        // Set max date
+
         datePicker.maxDate = System.currentTimeMillis()
 
-        // Set onDismissListener
+
         setOnDismissListener { onDismissRequest() }
 
-        // Show dialog
+
         show()
     }
 }
@@ -324,7 +325,7 @@ fun RegistroPassword(
             } else {
                 painterResource(id = R.drawable.visibility)
             }
-            IconButton(onClick = { viewModel.toggleRepeatPasswordVisibility(passwordVisibility) }) {
+            IconButton(onClick = { viewModel.togglePasswordVisibility(passwordVisibility) }) {
                 Icon(painter = icon, contentDescription = "Show password")
             }
         }
