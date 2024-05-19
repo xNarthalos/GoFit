@@ -18,9 +18,12 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -34,10 +37,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -45,33 +50,48 @@ import java.util.Locale
 import com.example.gofit.R
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegistroScreen(viewModel: RegistroViewModel, navigationController: NavHostController) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = "GoFit - Registro",
+                        style = TextStyle(
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Color.White
+                        )
+                    )
+                },
+                colors = TopAppBarDefaults.smallTopAppBarColors(
+                    containerColor = Color(0xFF5DCF14)
+                )
+            )
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .background(Color.White)
+        ) {
 
-    Box(
-        Modifier
-            .fillMaxSize()
-
-            .background(Color.White)
-
-
-    ) {
-        HeaderRegistro(Modifier.align(Alignment.TopEnd))
-        BodyRegistro(Modifier.align(Alignment.TopCenter), viewModel,navigationController)
-        FooterRegistro(Modifier.align(Alignment.BottomCenter))
+            BodyRegistro(Modifier.align(Alignment.CenterHorizontally), viewModel, navigationController)
+            FooterRegistro(Modifier.align(Alignment.CenterHorizontally))
+        }
     }
-
 }
+
 
 @Composable
 fun FooterRegistro(modifier: Modifier) {
     Spacer(modifier = Modifier.size(60.dp))
 }
 
-@Composable
-fun HeaderRegistro(align: Modifier) {
 
-}
 
 @Composable
 fun BodyRegistro(modifier: Modifier, viewModel: RegistroViewModel,navigationController: NavHostController) {

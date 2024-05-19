@@ -1,51 +1,66 @@
 package com.example.gofit.login
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.example.gofit.R // Asegúrate de que este sea el camino correcto a tu archivo de recursos
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ForgotPasswordScreen(viewModel: ForgotPasswordViewModel, navigationController: NavHostController){
-
-    Box(
-        Modifier
-            .fillMaxSize()
-            .padding(4.dp)
-            .background(Color.White)
-
-
-    ) {
-        BodyForgot(Modifier.align(Alignment.Center),viewModel)
-
+fun ForgotPasswordScreen(viewModel: ForgotPasswordViewModel, navigationController: NavHostController) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = "GoFit - Recuperar Contraseña",
+                        style = TextStyle(
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Color.White
+                        )
+                    )
+                },
+                colors = TopAppBarDefaults.smallTopAppBarColors(
+                    containerColor = Color(0xFF5DCF14)
+                )
+            )
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .background(Color.White)
+        ) {
+            Spacer(modifier = Modifier.height(16.dp))
+            ImageLogo(Modifier.align(Alignment.CenterHorizontally))
+            Spacer(modifier = Modifier.height(16.dp))
+            BodyForgot(Modifier.align(Alignment.CenterHorizontally), viewModel)
+        }
     }
 }
 
+
+
 @Composable
-fun ButtonForgot(loginButtonEnable: Boolean,email: String, viewModel: ForgotPasswordViewModel) {
+fun ButtonForgot(loginButtonEnable: Boolean, email: String, viewModel: ForgotPasswordViewModel) {
     Button(
-        onClick = {viewModel.resetPassword(email)},
+        onClick = { viewModel.resetPassword(email) },
         enabled = loginButtonEnable,
         modifier = Modifier
             .fillMaxWidth()
@@ -62,26 +77,26 @@ fun ButtonForgot(loginButtonEnable: Boolean,email: String, viewModel: ForgotPass
 }
 
 @Composable
-fun BodyForgot(modifier: Modifier,viewModel: ForgotPasswordViewModel) {
+fun BodyForgot(modifier: Modifier, viewModel: ForgotPasswordViewModel) {
     val email: String by viewModel.email.observeAsState(initial = "")
     val loginButtonEnable: Boolean by viewModel.forgotButtonEnable.observeAsState(initial = false)
 
-    Column(modifier=modifier) {
-        EmailForgot(email){ viewModel.onForgotPasswordChanged(it) }
-
+    Column(
+        modifier = modifier.padding(horizontal = 16.dp)
+    ) {
+        Spacer(modifier = Modifier.size(42.dp))
+        EmailForgot(email) { viewModel.onForgotPasswordChanged(it) }
         Spacer(modifier = Modifier.size(16.dp))
-        ButtonForgot(loginButtonEnable,email,viewModel)
+        ButtonForgot(loginButtonEnable, email, viewModel)
     }
 }
-
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EmailForgot(email: String, onTextChanged: (String) -> Unit) {
     TextField(
         value = email,
-        onValueChange = {  onTextChanged(it)},
+        onValueChange = { onTextChanged(it) },
         modifier = Modifier.fillMaxWidth(),
         placeholder = { Text(text = "Introduce un Email") },
         maxLines = 1,
@@ -95,8 +110,3 @@ fun EmailForgot(email: String, onTextChanged: (String) -> Unit) {
         )
     )
 }
-
-
-
-
-

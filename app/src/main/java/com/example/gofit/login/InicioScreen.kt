@@ -1,5 +1,6 @@
 package com.example.gofit.login
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -27,6 +28,7 @@ fun Inicio(stepCountViewModel: StepCountViewModel = viewModel()) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(Color.White)
             .padding(16.dp)
     ) {
         MyCard(
@@ -34,19 +36,19 @@ fun Inicio(stepCountViewModel: StepCountViewModel = viewModel()) {
             value = pasos.toString(),
             unit = "pasos"
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         MyCard(
             title = "Calorías quemadas hoy",
             value = calorias.toString(),
             unit = "kcal"
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         MyCard(
             title = "Distancia recorrida hoy",
             value = String.format("%.2f", distancia),
             unit = "km"
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         MyCard(
             title = "Tiempo activo hoy",
             value = "0 segundos",
