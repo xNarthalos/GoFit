@@ -9,6 +9,13 @@ import android.hardware.SensorManager
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
+import com.example.gofit.login.data.GoFitDatabase
+import com.example.gofit.login.data.UserData
+import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.*
 
 class StepCountViewModel(application: Application) : AndroidViewModel(application), SensorEventListener {
 
@@ -23,6 +30,7 @@ class StepCountViewModel(application: Application) : AndroidViewModel(applicatio
 
     private val _calorias = MutableLiveData<Int>()
     val calorias: LiveData<Int> = _calorias
+
     private val _tiempoCronometro = MutableLiveData<Long>()
     val tiempoCronometro: LiveData<Long> = _tiempoCronometro
 
@@ -41,14 +49,70 @@ class StepCountViewModel(application: Application) : AndroidViewModel(applicatio
     var isCronometroRunning: Boolean = false
     var isCronometroPaused: Boolean = false
 
+    private val userDataDao = GoFitDatabase.getDatabase(application).userDataDao()
+    private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+    private var currentDate = dateFormat.format(Date())
+    private var userId: String? = FirebaseAuth.getInstance().currentUser?.uid
+
     init {
-        startSensor()
+
+        updateUserId()
+
+    }
+
+    fun updateUserId() {
+        userId = FirebaseAuth.getInstance().currentUser?.uid
+        if (userId == null) {
+            stopSensor()
+        } else {
+            startSensor()
+            loadData()
+        }
+    }
+
+    private fun isUserAuthenticated(): Boolean {
+        return FirebaseAuth.getInstance().currentUser != null
+    }
+
+    private fun loadData() {
+        userId?.let { uid ->
+            viewModelScope.launch {
+                val userData = userDataDao.getUserDataByDate(uid, currentDate)
+                if (userData != null) {
+                    _pasos.postValue(userData.steps)
+                    _distancia.postValue(userData.distance)
+                    _calorias.postValue(userData.calories)
+                }
+            }
+        }
+    }
+
+    private fun saveData() {
+        userId?.let { uid ->
+            viewModelScope.launch {
+                userDataDao.insert(
+                    UserData(
+                        userId = uid,
+                        date = currentDate,
+                        steps = _pasos.value ?: 0,
+                        distance = _distancia.value ?: 0f,
+                        calories = _calorias.value ?: 0
+                    )
+                )
+            }
+        }
     }
 
     fun startSensor() {
-        stepCountSensor?.also { sensor ->
-            sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_UI)
+        if (isUserAuthenticated()) {
+            stepCountSensor?.also { sensor ->
+                sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_UI)
+            }
         }
+    }
+
+    fun stopSensor() {
+        sensorManager.unregisterListener(this)
     }
 
     fun startCronometro() {
@@ -82,6 +146,10 @@ class StepCountViewModel(application: Application) : AndroidViewModel(applicatio
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
+        if (!isUserAuthenticated()) {
+            return
+        }
+
         if (event?.sensor?.type == Sensor.TYPE_STEP_COUNTER) {
             val pasosTotales = event.values[0].toInt()
             if (pasosIniciales == null) {
@@ -91,6 +159,8 @@ class StepCountViewModel(application: Application) : AndroidViewModel(applicatio
             _pasos.postValue(pasosActuales)
             _distancia.postValue(pasosActuales * 0.762f / 1000)
             _calorias.postValue((pasosActuales * 0.05f).toInt())
+
+            saveData()
 
             if (isCronometroRunning && !isCronometroPaused) {
                 val pasosCronometroActuales = pasosActuales - pasosCronometroIniciales

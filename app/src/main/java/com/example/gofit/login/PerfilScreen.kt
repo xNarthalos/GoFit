@@ -5,7 +5,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 
 @Composable
-fun Perfil(){
+fun Perfil(stepCountViewModel: StepCountViewModel) {
     Box {
         Text(text = "Perfil")
     }

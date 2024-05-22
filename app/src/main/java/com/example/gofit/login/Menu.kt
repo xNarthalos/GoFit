@@ -1,4 +1,3 @@
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -13,7 +12,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -23,12 +21,13 @@ import com.example.gofit.R
 import com.example.gofit.login.Entrenamiento
 import com.example.gofit.login.Inicio
 import com.example.gofit.login.Perfil
+import com.example.gofit.login.StepCountViewModel
 import com.google.firebase.auth.FirebaseAuth
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Menu(navigationController: NavHostController) {
+fun Menu(navigationController: NavHostController, stepCountViewModel: StepCountViewModel) {
     val auth = FirebaseAuth.getInstance()
     val innerNavController = rememberNavController()
 
@@ -58,9 +57,9 @@ fun Menu(navigationController: NavHostController) {
             startDestination = "Home",
             Modifier.padding(innerPadding)
         ) {
-            composable("Home") { Inicio() }
-            composable("Ruta") { Entrenamiento() }
-            composable("Perfil") { Perfil() }
+            composable("Home") { Inicio(stepCountViewModel) }
+            composable("Ruta") { Entrenamiento(stepCountViewModel) }
+            composable("Perfil") { Perfil(stepCountViewModel) }
         }
     }
 }
@@ -142,25 +141,6 @@ fun MyBottomNavigation(navigationController: NavHostController) {
             },
             label = { Text(text = "Perfil") }
         )
-    }
-}
-
-@Composable
-fun MyCard() {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
-        shape = MaterialTheme.shapes.small,
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF5DCF14)),
-        border = BorderStroke(5.dp, Color.Green)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = "Ejemplo 1", color = Color.White)
-            Text(text = "Ejemplo 2", color = Color.White)
-            Text(text = "Ejemplo 3", color = Color.White)
-        }
     }
 }
 

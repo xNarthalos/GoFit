@@ -7,19 +7,16 @@ import android.os.Bundle
 import android.Manifest
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.gofit.login.ForgotPassword
 import com.example.gofit.login.ForgotPasswordScreen
 import com.example.gofit.login.ForgotPasswordViewModel
 import com.example.gofit.login.LoginScreen
@@ -27,12 +24,15 @@ import com.example.gofit.login.LoginViewModel
 import com.example.gofit.login.RegistroScreen
 import com.example.gofit.login.RegistroViewModel
 import com.example.gofit.login.StepCountViewModel
+
 import com.example.gofit.ui.theme.GoFitTheme
 import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
 
     private val ACTIVITY_RECOGNITION_REQUEST_CODE = 100
+
+    private val stepCountViewModel: StepCountViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,7 +63,7 @@ class MainActivity : ComponentActivity() {
                     NavHost(navController = navigationController, startDestination = startDestination) {
                         composable("LoginScreen") { LoginScreen(viewModel = LoginViewModel(), navigationController) }
                         composable("RegistroScreen") { RegistroScreen(viewModel = RegistroViewModel(), navigationController) }
-                        composable("Menu") { Menu(navigationController) }
+                        composable("Menu") { Menu(navigationController, stepCountViewModel) }
                         composable("ForgotPassword") { ForgotPasswordScreen(viewModel = ForgotPasswordViewModel(), navigationController) }
                     }
                 }
