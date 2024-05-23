@@ -49,7 +49,7 @@ fun Menu(navigationController: NavHostController, stepCountViewModel: StepCountV
             )
         },
         bottomBar = {
-            MyBottomNavigation(innerNavController)
+            MyBottomNavigation(innerNavController,stepCountViewModel)
         }
     ) { innerPadding ->
         NavHost(
@@ -105,12 +105,13 @@ fun MyTopAppBar(
 
 
 @Composable
-fun MyBottomNavigation(navigationController: NavHostController) {
+fun MyBottomNavigation(navigationController: NavHostController,stepCountViewModel: StepCountViewModel) {
     var index by remember { mutableStateOf(0) }
     NavigationBar(containerColor = Color(0xFF5DCF14)) {
         NavigationBarItem(
             selected = index == 0,
             onClick = {
+                stepCountViewModel.saveData()
                 index = 0
                 navigationController.navigate("Home")
             },
@@ -122,6 +123,7 @@ fun MyBottomNavigation(navigationController: NavHostController) {
         NavigationBarItem(
             selected = index == 1,
             onClick = {
+                stepCountViewModel.saveData()
                 index = 1
                 navigationController.navigate("Ruta")
             },
@@ -133,6 +135,7 @@ fun MyBottomNavigation(navigationController: NavHostController) {
         NavigationBarItem(
             selected = index == 2,
             onClick = {
+                stepCountViewModel.saveData()
                 index = 2
                 navigationController.navigate("Perfil")
             },

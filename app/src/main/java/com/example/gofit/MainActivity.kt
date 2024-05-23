@@ -14,6 +14,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -24,9 +26,9 @@ import com.example.gofit.login.LoginViewModel
 import com.example.gofit.login.RegistroScreen
 import com.example.gofit.login.RegistroViewModel
 import com.example.gofit.login.StepCountViewModel
-
 import com.example.gofit.ui.theme.GoFitTheme
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
@@ -38,6 +40,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
 
+        // Solicitar permisos para la actividad física si es necesario
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACTIVITY_RECOGNITION)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -48,6 +51,7 @@ class MainActivity : ComponentActivity() {
                 )
             }
         }
+
 
         setContent {
             GoFitTheme {
@@ -61,10 +65,10 @@ class MainActivity : ComponentActivity() {
 
                     val startDestination = if (currentUser != null) "Menu" else "LoginScreen"
                     NavHost(navController = navigationController, startDestination = startDestination) {
-                        composable("LoginScreen") { LoginScreen(viewModel = LoginViewModel(), navigationController) }
-                        composable("RegistroScreen") { RegistroScreen(viewModel = RegistroViewModel(), navigationController) }
+                        composable("LoginScreen") { LoginScreen(viewModel = viewModel(), navigationController) }
+                        composable("RegistroScreen") { RegistroScreen(viewModel = viewModel(), navigationController) }
                         composable("Menu") { Menu(navigationController, stepCountViewModel) }
-                        composable("ForgotPassword") { ForgotPasswordScreen(viewModel = ForgotPasswordViewModel(), navigationController) }
+                        composable("ForgotPassword") { ForgotPasswordScreen(viewModel = viewModel(), navigationController) }
                     }
                 }
             }
@@ -79,10 +83,20 @@ class MainActivity : ComponentActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == ACTIVITY_RECOGNITION_REQUEST_CODE) {
             if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-
-                val stepCountViewModel = StepCountViewModel(application)
                 stepCountViewModel.startSensor()
             }
         }
     }
+
+    override fun onPause() {
+        super.onPause()
+        stepCountViewModel.saveData()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        stepCountViewModel.saveData()
+    }
 }
+
+
