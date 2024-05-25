@@ -151,8 +151,11 @@ fun signOutUser(auth: FirebaseAuth, navigationController: NavHostController) {
     auth.signOut()
 
     if (auth.currentUser == null) {
-
-        navigationController.popBackStack(route = "LoginScreen", inclusive = true)
-        navigationController.navigate("LoginScreen")
+        navigationController.navigate("LoginScreen") {
+            popUpTo(navigationController.graph.startDestinationId) {
+                inclusive = true
+            }
+            launchSingleTop = true
+        }
     }
 }

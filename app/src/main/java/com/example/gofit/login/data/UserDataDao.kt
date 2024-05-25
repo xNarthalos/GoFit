@@ -4,12 +4,15 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 
 @Dao
 interface UserDataDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(userData: UserData)
+    @Update
+    suspend fun update(userData: UserData)
 
     @Query("SELECT * FROM user_data WHERE userId = :userId AND date = :date")
     suspend fun getUserDataByDate(userId: String, date: String): UserData?

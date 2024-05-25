@@ -91,11 +91,14 @@ class MainActivity : ComponentActivity() {
     override fun onPause() {
         super.onPause()
         stepCountViewModel.saveData()
+        stepCountViewModel.saveDataToFirestore()
     }
 
     override fun onStop() {
         super.onStop()
         stepCountViewModel.saveData()
+        stepCountViewModel.saveDataToFirestore()
+
     }
 }
 
