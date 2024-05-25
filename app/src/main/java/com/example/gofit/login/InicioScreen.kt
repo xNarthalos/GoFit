@@ -84,7 +84,7 @@ fun DailyCard(title: String, todayValue: String, unit: String) {
             .fillMaxWidth()
             .wrapContentHeight(),
         shape = RoundedCornerShape(10.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF5DCF14))
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF6BF711))
     ) {
         Column(
             modifier = Modifier
@@ -133,7 +133,7 @@ fun WeeklyCard(
             .fillMaxWidth()
             .wrapContentHeight(),
         shape = RoundedCornerShape(10.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF5DCF14))
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF6BF711))
     ) {
         Column(
             modifier = Modifier

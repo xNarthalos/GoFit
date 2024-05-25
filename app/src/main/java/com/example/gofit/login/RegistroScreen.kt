@@ -1,6 +1,7 @@
 package com.example.gofit.login
 
 import android.app.DatePickerDialog
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,15 +10,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -31,6 +32,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
@@ -79,15 +81,15 @@ fun RegistroScreen(viewModel: RegistroViewModel, navigationController: NavHostCo
                 .background(Color.White)
         ) {
 
-            BodyRegistro(Modifier.align(Alignment.CenterHorizontally), viewModel, navigationController)
-            FooterRegistro(Modifier.align(Alignment.CenterHorizontally))
+            BodyRegistro(Modifier.align(CenterHorizontally), viewModel, navigationController)
+            FooterRegistro()
         }
     }
 }
 
 
 @Composable
-fun FooterRegistro(modifier: Modifier) {
+fun FooterRegistro() {
     Spacer(modifier = Modifier.size(60.dp))
 }
 
@@ -156,7 +158,7 @@ fun BodyRegistro(modifier: Modifier, viewModel: RegistroViewModel,navigationCont
 fun BotonRegistro(registroEnable: Boolean,email :String , password: String, viewModel: RegistroViewModel,navigationController: NavHostController ) {
     Button(
         onClick = {viewModel.registro(email,password)
-                   navigationController.navigate("Menu")},
+                   navigationController.navigate("com.example.gofit.login.Menu")},
         enabled = registroEnable,
         modifier = Modifier
             .fillMaxWidth()
@@ -235,44 +237,67 @@ fun RepetirPassword(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FechaNacimiento(dateOfBirth: Calendar, onDateSelected: (Calendar) -> Unit) {
+fun FechaNacimiento(
+    dateOfBirth: Calendar,
+    onDateSelected: (Calendar) -> Unit
+) {
     var showDatePickerDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
-
-    Column {
-        // Campo de texto para mostrar la fecha de nacimiento actual
-        TextField(
-            value = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(dateOfBirth.time),
-            onValueChange = {},
-            modifier = Modifier.fillMaxWidth(),
-            readOnly = true,
-            label = { Text("Fecha de Nacimiento") },
-            colors = TextFieldDefaults.textFieldColors(
-                textColor = Color(0xFFB2B2B2),
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                containerColor = Color(0xFFFAFAFA)
-            ),
-            trailingIcon = {
-                IconButton(onClick = { showDatePickerDialog = true }) {
-                    Icon(Icons.Default.DateRange, contentDescription = "Seleccionar fecha")
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            OutlinedButton(
+                onClick = { showDatePickerDialog = true },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(8.dp),
+                border = BorderStroke(1.dp, Color.Transparent),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    containerColor = Color(0xFFFAFAFA),
+                    contentColor = Color(0xFFB2B2B2)
+                )
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.Start,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "Fecha de Nacimiento",
+                        fontSize = 14.sp,
+                        color = Color(0xFFB2B2B2),
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    )
+                    Text(
+                        text = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(dateOfBirth.time),
+                        color = Color(0xFFB2B2B2)
+                    )
                 }
             }
-        )
-
-        // Diálogo de selección de fecha
+        }
         if (showDatePickerDialog) {
             DatePickerDialog(
-                onDismissRequest = { showDatePickerDialog = false },
-                initialDate = dateOfBirth,
-                onDateSelected = { nuevaFecha ->
-                    onDateSelected(nuevaFecha)
+                context,
+                { _, year, month, dayOfMonth ->
+                    val selectedDate = Calendar.getInstance()
+                    selectedDate.set(year, month, dayOfMonth)
+                    onDateSelected(selectedDate)
                     showDatePickerDialog = false
-                }
-            )
+                },
+                dateOfBirth.get(Calendar.YEAR),
+                dateOfBirth.get(Calendar.MONTH),
+                dateOfBirth.get(Calendar.DAY_OF_MONTH)
+            ).apply {
+                datePicker.maxDate = System.currentTimeMillis()
+                show()
+            }
         }
     }
 }
+
 
 @Composable
 fun DatePickerDialog(

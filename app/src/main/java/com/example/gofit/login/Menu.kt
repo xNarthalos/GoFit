@@ -1,3 +1,5 @@
+package com.example.gofit.login
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -18,10 +20,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.gofit.R
-import com.example.gofit.login.Entrenamiento
-import com.example.gofit.login.Inicio
-import com.example.gofit.login.Perfil
-import com.example.gofit.login.StepCountViewModel
 import com.google.firebase.auth.FirebaseAuth
 
 
@@ -34,8 +32,7 @@ fun Menu(navigationController: NavHostController, stepCountViewModel: StepCountV
     Scaffold(
         topBar = {
             val currentBackStackEntry by innerNavController.currentBackStackEntryAsState()
-            val currentRoute = currentBackStackEntry?.destination?.route ?: "GoFit"
-            val title = when (currentRoute) {
+            val title = when (currentBackStackEntry?.destination?.route ?: "GoFit") {
                 "Ruta" -> "GoFit - Entrenamiento"
                 "Perfil" -> "GoFit - Perfil"
                 "Home" -> "GoFit - Inicio"
@@ -43,8 +40,6 @@ fun Menu(navigationController: NavHostController, stepCountViewModel: StepCountV
             }
             MyTopAppBar(
                 title = title,
-                onClickIcon = {},
-                onClickDrawer = {},
                 onSignOut = { signOutUser(auth, navigationController) }
             )
         },
@@ -59,7 +54,7 @@ fun Menu(navigationController: NavHostController, stepCountViewModel: StepCountV
         ) {
             composable("Home") { Inicio(stepCountViewModel) }
             composable("Ruta") { Entrenamiento(stepCountViewModel) }
-            composable("Perfil") { Perfil(stepCountViewModel) }
+            composable("Perfil") { Perfil() }
         }
     }
 }
@@ -70,8 +65,6 @@ fun Menu(navigationController: NavHostController, stepCountViewModel: StepCountV
 @Composable
 fun MyTopAppBar(
     title: String,
-    onClickIcon: () -> Unit,
-    onClickDrawer: () -> Unit,
     onSignOut: () -> Unit
 ) {
     val menuExpanded = remember { mutableStateOf(false) }
@@ -113,7 +106,12 @@ fun MyBottomNavigation(navigationController: NavHostController,stepCountViewMode
             onClick = {
                 stepCountViewModel.saveData()
                 index = 0
-                navigationController.navigate("Home")
+                navigationController.navigate("Home") {
+                    popUpTo(navigationController.graph.startDestinationId) {
+                        inclusive = true
+                    }
+                    launchSingleTop = true
+                }
             },
             icon = {
                 Icon(imageVector = Icons.Default.Home, contentDescription = "Inicio", tint = Color.White)
@@ -125,7 +123,12 @@ fun MyBottomNavigation(navigationController: NavHostController,stepCountViewMode
             onClick = {
                 stepCountViewModel.saveData()
                 index = 1
-                navigationController.navigate("Ruta")
+                navigationController.navigate("Ruta") {
+                    popUpTo(navigationController.graph.startDestinationId) {
+                        inclusive = true
+                    }
+                    launchSingleTop = true
+                }
             },
             icon = {
                 Icon(painter = painterResource(id = R.drawable.entrenamiento), contentDescription = "Entrenamiento", tint = Color.White)
@@ -137,7 +140,12 @@ fun MyBottomNavigation(navigationController: NavHostController,stepCountViewMode
             onClick = {
                 stepCountViewModel.saveData()
                 index = 2
-                navigationController.navigate("Perfil")
+                navigationController.navigate("Perfil") {
+                    popUpTo(navigationController.graph.startDestinationId) {
+                        inclusive = true
+                    }
+                    launchSingleTop = true
+                }
             },
             icon = {
                 Icon(imageVector = Icons.Default.Person, contentDescription = "Perfil", tint = Color.White)

@@ -49,7 +49,7 @@ fun Entrenamiento(stepCountViewModel: StepCountViewModel = viewModel()) {
             title = "Pasos dados",
             value = pasosCronometro.toString(),
             unit = "pasos",
-            backgroundColor = Color(0xFF5DCF14)
+            backgroundColor = Color(0xFF6BF711)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -58,7 +58,7 @@ fun Entrenamiento(stepCountViewModel: StepCountViewModel = viewModel()) {
             title = "Calorías quemadas",
             value = caloriasCronometro.toString(),
             unit = "kcal",
-            backgroundColor = Color(0xFF5DCF14)
+            backgroundColor = Color(0xFF6BF711)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -67,7 +67,7 @@ fun Entrenamiento(stepCountViewModel: StepCountViewModel = viewModel()) {
             title = "Tiempo activo",
             value = "${time / 60} minutos : ${time % 60} segundos",
             unit = "",
-            backgroundColor = Color(0xFF5DCF14)
+            backgroundColor = Color(0xFF6BF711)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -76,7 +76,7 @@ fun Entrenamiento(stepCountViewModel: StepCountViewModel = viewModel()) {
             title = "Distancia recorrida",
             value = String.format("%.2f", distanciaCronometro),
             unit = "km",
-            backgroundColor = Color(0xFF5DCF14)
+            backgroundColor = Color(0xFF6BF711)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -121,7 +121,7 @@ fun Entrenamiento(stepCountViewModel: StepCountViewModel = viewModel()) {
                                     delay(3000)
                                     isRunning = false
                                     isPaused = false
-                                    buttonColor = Color(0xFF5DCF14)
+                                    buttonColor = Color(0xFF6BF711)
                                     buttonOffset = Offset(0f, 0f)
                                     isButtonEnabled = false
                                     delay(1000)

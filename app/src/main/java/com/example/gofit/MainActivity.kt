@@ -1,6 +1,6 @@
 package com.example.gofit
 
-import Menu
+import com.example.gofit.login.Menu
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -14,21 +14,16 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.gofit.login.ForgotPasswordScreen
-import com.example.gofit.login.ForgotPasswordViewModel
 import com.example.gofit.login.LoginScreen
-import com.example.gofit.login.LoginViewModel
 import com.example.gofit.login.RegistroScreen
-import com.example.gofit.login.RegistroViewModel
 import com.example.gofit.login.StepCountViewModel
 import com.example.gofit.ui.theme.GoFitTheme
 import com.google.firebase.auth.FirebaseAuth
-import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
@@ -40,7 +35,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
 
-        // Solicitar permisos para la actividad física si es necesario
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACTIVITY_RECOGNITION)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -67,7 +62,7 @@ class MainActivity : ComponentActivity() {
                     NavHost(navController = navigationController, startDestination = startDestination) {
                         composable("LoginScreen") { LoginScreen(viewModel = viewModel(), navigationController) }
                         composable("RegistroScreen") { RegistroScreen(viewModel = viewModel(), navigationController) }
-                        composable("Menu") { Menu(navigationController, stepCountViewModel) }
+                        composable("Menu") { Menu(navigationController, stepCountViewModel ) }
                         composable("ForgotPassword") { ForgotPasswordScreen(viewModel = viewModel(), navigationController) }
                     }
                 }
@@ -75,6 +70,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
