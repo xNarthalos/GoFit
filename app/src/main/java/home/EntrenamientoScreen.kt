@@ -1,4 +1,4 @@
-package com.example.gofit.login
+package home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

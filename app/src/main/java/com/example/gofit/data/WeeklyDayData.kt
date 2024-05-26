@@ -1,3 +1,3 @@
-package com.example.gofit.login.data
+package com.example.gofit.data
 
 data class WeeklyDayData( val dayName: String, val value: String)

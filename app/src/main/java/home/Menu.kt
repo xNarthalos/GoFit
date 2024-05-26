@@ -1,4 +1,4 @@
-package com.example.gofit.login
+package home
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -14,6 +14,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -28,6 +29,7 @@ import com.google.firebase.auth.FirebaseAuth
 fun Menu(navigationController: NavHostController, stepCountViewModel: StepCountViewModel) {
     val auth = FirebaseAuth.getInstance()
     val innerNavController = rememberNavController()
+    val perfilViewModel: PerfilViewModel = viewModel()
 
     Scaffold(
         topBar = {
@@ -35,12 +37,12 @@ fun Menu(navigationController: NavHostController, stepCountViewModel: StepCountV
             val title = when (currentBackStackEntry?.destination?.route ?: "GoFit") {
                 "Ruta" -> "GoFit - Entrenamiento"
                 "Perfil" -> "GoFit - Perfil"
-                "Home" -> "GoFit - Inicio"
+                "home" -> "GoFit - Inicio"
                 else -> "GoFit"
             }
             MyTopAppBar(
                 title = title,
-                onSignOut = { signOutUser(auth, navigationController) }
+                onSignOut = { signOutUser(auth, navigationController,stepCountViewModel) }
             )
         },
         bottomBar = {
@@ -49,12 +51,12 @@ fun Menu(navigationController: NavHostController, stepCountViewModel: StepCountV
     ) { innerPadding ->
         NavHost(
             navController = innerNavController,
-            startDestination = "Home",
+            startDestination = "home",
             Modifier.padding(innerPadding)
         ) {
-            composable("Home") { Inicio(stepCountViewModel) }
+            composable("home") { Inicio(stepCountViewModel) }
             composable("Ruta") { Entrenamiento(stepCountViewModel) }
-            composable("Perfil") { Perfil() }
+            composable("Perfil") { Perfil(perfilViewModel) }
         }
     }
 }
@@ -106,7 +108,7 @@ fun MyBottomNavigation(navigationController: NavHostController,stepCountViewMode
             onClick = {
                 stepCountViewModel.saveData()
                 index = 0
-                navigationController.navigate("Home") {
+                navigationController.navigate("home") {
                     popUpTo(navigationController.graph.startDestinationId) {
                         inclusive = true
                     }
@@ -155,7 +157,11 @@ fun MyBottomNavigation(navigationController: NavHostController,stepCountViewMode
     }
 }
 
-fun signOutUser(auth: FirebaseAuth, navigationController: NavHostController) {
+fun signOutUser(
+    auth: FirebaseAuth,
+    navigationController: NavHostController,
+    stepCountViewModel: StepCountViewModel
+) {
     auth.signOut()
 
     if (auth.currentUser == null) {
@@ -166,4 +172,5 @@ fun signOutUser(auth: FirebaseAuth, navigationController: NavHostController) {
             launchSingleTop = true
         }
     }
+    stepCountViewModel.updateUserId()
 }

@@ -62,7 +62,7 @@ import com.google.firebase.auth.GoogleAuthProvider
 
 
 @Composable
-fun LoginScreen(viewModel: LoginViewModel, navigationController: NavHostController) {
+fun LoginScreen(viewModel: LoginViewModel, navigationController: NavHostController, onLoginSuccess: () -> Unit) {
 
 
     Box(
@@ -74,7 +74,7 @@ fun LoginScreen(viewModel: LoginViewModel, navigationController: NavHostControll
 
     ) {
         Header(Modifier.align(Alignment.TopEnd))
-        Body(Modifier.align(Alignment.Center), viewModel, navigationController)
+        Body(Modifier.align(Alignment.Center), viewModel, navigationController, onLoginSuccess)
         Footer(Modifier.align(Alignment.BottomCenter), navigationController)
     }
 
@@ -114,7 +114,7 @@ fun SingUp(navigationController: NavHostController) {
 }
 
 @Composable
-fun Body(modifier: Modifier, viewModel: LoginViewModel, navigationController: NavHostController) {
+fun Body(modifier: Modifier, viewModel: LoginViewModel, navigationController: NavHostController, onLoginSuccess: () -> Unit) {
 
     val email: String by viewModel.email.observeAsState(initial = "")
     val password: String by viewModel.password.observeAsState(initial = "")
@@ -144,20 +144,22 @@ fun Body(modifier: Modifier, viewModel: LoginViewModel, navigationController: Na
             viewModel = viewModel,
             email = email,
             password = password,
-            onLoginSelected = viewModel::onLoginSelected
+            onLoginSelected = viewModel::onLoginSelected,
+            onLoginSuccess = onLoginSuccess
+
         )
 
         Spacer(modifier = Modifier.size(16.dp))
         LoginDivider()
         Spacer(modifier = Modifier.size(32.dp))
-        SocialLogin(viewModel, navigationController)
+        SocialLogin(viewModel, navigationController, onLoginSuccess)
 
     }
 }
 
 @SuppressLint("NewApi")
 @Composable
-fun SocialLogin(viewModel: LoginViewModel, navigationController: NavHostController) {
+fun SocialLogin(viewModel: LoginViewModel, navigationController: NavHostController, onLoginSuccess: () -> Unit) {
 
     val context = LocalContext.current
 
@@ -167,9 +169,7 @@ fun SocialLogin(viewModel: LoginViewModel, navigationController: NavHostControll
             try {
                 val account = task.getResult(ApiException::class.java)
                 val credential = GoogleAuthProvider.getCredential(account.idToken, null)
-                viewModel.signInWithGoogle(credential) {
-                    navigationController.navigate("Menu")
-                }
+                viewModel.signInWithGoogle(credential,{ navigationController.navigate("Menu") }, onLoginSuccess)
             } catch (ex: Exception) {
                 Log.d("google", "excepcion al iniciar con google " + ex.localizedMessage)
             }
@@ -238,7 +238,8 @@ fun LoginButton(
     onLoginSelected: () -> Unit,
     viewModel: LoginViewModel,
     email: String,
-    password: String
+    password: String,
+    onLoginSuccess: () -> Unit
 ) {
     val errorMessage: String? by viewModel.errorMessage.observeAsState()
 
@@ -246,7 +247,9 @@ fun LoginButton(
         onClick = {
             onLoginSelected()
             if (isLoginEnabled) {
-                viewModel.signInWithEmailAndPassword(email, password, navigationController)
+                viewModel.signInWithEmailAndPassword(email, password, navigationController){
+                    onLoginSuccess()
+                }
             }
         },
         enabled = isLoginEnabled,
@@ -285,7 +288,7 @@ fun ForgotPassword(modifier: Modifier, navigationController: NavHostController) 
         fontSize = 12.sp,
         fontWeight = FontWeight.Bold,
         color = Color(0xFF4EA8E9),
-        modifier = modifier.clickable { navigationController.navigate("ForgotPassword") }
+        modifier = modifier.clickable { navigationController.navigate("forgotPassword") }
     )
 }
 

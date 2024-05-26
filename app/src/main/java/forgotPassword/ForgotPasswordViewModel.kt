@@ -1,4 +1,4 @@
-package com.example.gofit.login
+package forgotPassword
 import android.util.Patterns
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -6,15 +6,11 @@ import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
 
 class ForgotPasswordViewModel : ViewModel() {
-    private  var firebaseAuth: FirebaseAuth
+    private var firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
 
 
     private val _email =MutableLiveData<String>()
     val email: LiveData<String> = _email
-
-    init {
-        firebaseAuth = FirebaseAuth.getInstance()
-    }
 
     private val _ForgotButtonEnable=MutableLiveData<Boolean>()
     val forgotButtonEnable: LiveData<Boolean> = _ForgotButtonEnable

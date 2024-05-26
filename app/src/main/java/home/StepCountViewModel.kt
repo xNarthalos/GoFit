@@ -1,4 +1,4 @@
-package com.example.gofit.login
+package home
 
 import android.app.Application
 import android.content.Context
@@ -10,9 +10,8 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.gofit.login.data.DayData
-import com.example.gofit.login.data.GoFitDatabase
-import com.example.gofit.login.data.UserData
+import com.example.gofit.data.GoFitDatabase
+import com.example.gofit.data.UserData
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
@@ -79,15 +78,32 @@ class StepCountViewModel(application: Application) : AndroidViewModel(applicatio
     // Bloque de inicialización, inicia el sensor y carga los datos del usuario
     init {
         startSensor()
-        loadData()
-        loadWeeklyData()
+        updateUserId()
     }
 
     // Actualiza el ID del usuario y recarga los datos
     fun updateUserId() {
+        clearData()
         userId = FirebaseAuth.getInstance().currentUser?.uid
         loadData()
+        loadWeeklyData()
     }
+    // Limpia los datos del ViewModel
+    fun clearData() {
+        _pasos.value = 0
+        _distancia.value = 0f
+        _calorias.value = 0
+        _tiempoCronometro.value = 0L
+        _pasosCronometro.value = 0
+        _distanciaCronometro.value = 0f
+        _caloriasCronometro.value = 0
+        _weeklyData.value = emptyList()
+        pasosIniciales = null
+        pasosCronometroIniciales = 0
+        isCronometroRunning = false
+        isCronometroPaused = false
+    }
+
 
     // Carga los datos del usuario desde la base de datos
     fun loadData() {
@@ -95,14 +111,16 @@ class StepCountViewModel(application: Application) : AndroidViewModel(applicatio
             viewModelScope.launch {
                 val userData = userDataDao.getUserDataByDate(uid, currentDate)
                 if (userData != null) {
-                    _pasos.postValue(userData.steps) // Establece los pasos iniciales
+                    // Establecemos los datos iniciales
+                    _pasos.postValue(userData.steps)
                     _distancia.postValue(userData.distance)
                     _calorias.postValue(userData.calories)
-                } else {
+                }
+                /*else {
                     _pasos.postValue(0)
                     _distancia.postValue(0f)
                     _calorias.postValue(0)
-                }
+                }*/
             }
         }
     }

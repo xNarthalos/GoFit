@@ -1,4 +1,4 @@
-package com.example.gofit.login
+package home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -14,13 +14,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.gofit.login.data.UserData
-import com.example.gofit.login.data.WeeklyDayData
+import com.example.gofit.data.UserData
+import com.example.gofit.data.WeeklyDayData
 import java.text.SimpleDateFormat
 import java.util.*
 
 @Composable
 fun Inicio(stepCountViewModel: StepCountViewModel = viewModel()) {
+
     val pasos by stepCountViewModel.pasos.observeAsState(0)
     val calorias by stepCountViewModel.calorias.observeAsState(0)
     val distancia by stepCountViewModel.distancia.observeAsState(0f)

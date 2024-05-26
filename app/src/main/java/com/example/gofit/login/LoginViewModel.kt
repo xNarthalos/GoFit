@@ -9,12 +9,10 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
-import java.util.Calendar
 
 class LoginViewModel : ViewModel() {
     private val auth: FirebaseAuth = Firebase.auth
@@ -59,9 +57,10 @@ class LoginViewModel : ViewModel() {
 
     }
 
-    fun signInWithEmailAndPassword(email: String, password: String, navController: NavController) {
+    fun signInWithEmailAndPassword(email: String, password: String, navController: NavController, onLoginSuccess: () -> Unit) {
         auth.signInWithEmailAndPassword(email, password).addOnCompleteListener { task ->
                 if (task.isSuccessful) {
+                    onLoginSuccess()
                     navController.navigate("Menu")
                 } else {
                     _errorMessage.value =
@@ -70,7 +69,8 @@ class LoginViewModel : ViewModel() {
             }
     }
 
-    fun signInWithGoogle(credential: AuthCredential, home: () -> Unit) = viewModelScope.launch {
+    fun signInWithGoogle(credential: AuthCredential, home: () -> Unit, onLoginSuccess: () -> Unit
+    ) = viewModelScope.launch  {
         try {
             auth.signInWithCredential(credential).addOnCompleteListener { task ->
                 if (task.isSuccessful) {
@@ -78,6 +78,8 @@ class LoginViewModel : ViewModel() {
                     user?.let {
                         guardarDatosUsuario(it.uid, it.email, it.displayName)
                     }
+                    onLoginSuccess()
+
                     Log.d("GoFit", "Logeado con google")
                     home()
                 }
@@ -96,9 +98,8 @@ class LoginViewModel : ViewModel() {
         val datosUsuario = hashMapOf(
             "email" to email,
             "usuario" to displayName,
-            "fechaDeNacimiento" to null
         )
-        db.collection("usuarios").document(uid).set(datosUsuario)
+        db.collection("usuarios").document(uid).update(datosUsuario as Map<String, Any>)
             .addOnSuccessListener {
                 Log.d("GoFit", "Datos del usuario guardados correctamente")
             }

@@ -1,4 +1,4 @@
-package com.example.gofit.login.data
+package com.example.gofit.data
 
 import androidx.room.Entity
 

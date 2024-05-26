@@ -1,4 +1,4 @@
-package com.example.gofit.login
+package registro
 
 import android.util.Patterns
 import androidx.lifecycle.LiveData
@@ -8,7 +8,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Locale
 
 class RegistroViewModel : ViewModel() {
     private val auth: FirebaseAuth = Firebase.auth
@@ -125,7 +127,9 @@ class RegistroViewModel : ViewModel() {
     fun guardarDatosUsuario(uid: String) {
         val email = _email.value
         val usuario = _userName.value
-        val fechaDeNacimiento = _fechaDeNacimiento.value
+        val fechaDeNacimiento = _fechaDeNacimiento.value?.let {
+            SimpleDateFormat("yyyy/MM/dd", Locale.getDefault()).format(it.time)
+        }
 
         val datosUsuario = hashMapOf(
             "email" to email,

@@ -1,4 +1,4 @@
-package com.example.gofit.login
+package registro
 
 import android.app.DatePickerDialog
 import androidx.compose.foundation.BorderStroke
@@ -81,22 +81,18 @@ fun RegistroScreen(viewModel: RegistroViewModel, navigationController: NavHostCo
                 .background(Color.White)
         ) {
 
-            BodyRegistro(Modifier.align(CenterHorizontally), viewModel, navigationController)
-            FooterRegistro()
+            BodyRegistro(Modifier, viewModel, navigationController)
         }
     }
 }
 
 
-@Composable
-fun FooterRegistro() {
-    Spacer(modifier = Modifier.size(60.dp))
-}
+
 
 
 
 @Composable
-fun BodyRegistro(modifier: Modifier, viewModel: RegistroViewModel,navigationController: NavHostController) {
+fun BodyRegistro(modifier: Modifier, viewModel: RegistroViewModel, navigationController: NavHostController) {
     val email: String by viewModel.email.observeAsState(initial = "")
     val password: String by viewModel.password.observeAsState(initial = "")
     val repetirPassword: String by viewModel.repetirPassword.observeAsState(initial = "")
@@ -110,7 +106,7 @@ fun BodyRegistro(modifier: Modifier, viewModel: RegistroViewModel,navigationCont
     val fechaDeNacimiento: Calendar by viewModel.fechaDeNacimiento.observeAsState(initial = Calendar.getInstance())
 
     Column(modifier = modifier) {
-        Spacer(modifier = Modifier.size(180.dp))
+        Spacer(modifier = Modifier.size(60.dp))
         RegistroEmail(
             email,
             { viewModel.onRegistroChanged(it, password, userName, repetirPassword) },
@@ -155,10 +151,10 @@ fun BodyRegistro(modifier: Modifier, viewModel: RegistroViewModel,navigationCont
 }
 
 @Composable
-fun BotonRegistro(registroEnable: Boolean,email :String , password: String, viewModel: RegistroViewModel,navigationController: NavHostController ) {
+fun BotonRegistro(registroEnable: Boolean, email :String, password: String, viewModel: RegistroViewModel, navigationController: NavHostController ) {
     Button(
         onClick = {viewModel.registro(email,password)
-                   navigationController.navigate("com.example.gofit.login.Menu")},
+                   navigationController.navigate("Menu")},
         enabled = registroEnable,
         modifier = Modifier
             .fillMaxWidth()
@@ -235,7 +231,6 @@ fun RepetirPassword(
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FechaNacimiento(
     dateOfBirth: Calendar,
@@ -244,7 +239,7 @@ fun FechaNacimiento(
     var showDatePickerDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(horizontalAlignment = CenterHorizontally) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()

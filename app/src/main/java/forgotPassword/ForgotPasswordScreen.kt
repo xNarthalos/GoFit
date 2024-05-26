@@ -1,4 +1,4 @@
-package com.example.gofit.login
+package forgotPassword
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -10,18 +10,16 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
-import com.example.gofit.R // Asegúrate de que este sea el camino correcto a tu archivo de recursos
+import com.example.gofit.login.ImageLogo
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ForgotPasswordScreen(viewModel: ForgotPasswordViewModel, navigationController: NavHostController) {
+fun ForgotPasswordScreen(viewModel: ForgotPasswordViewModel) {
     Scaffold(
         topBar = {
             TopAppBar(

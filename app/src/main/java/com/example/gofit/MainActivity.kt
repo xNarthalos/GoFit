@@ -1,6 +1,6 @@
 package com.example.gofit
 
-import com.example.gofit.login.Menu
+import home.Menu
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -18,10 +18,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.gofit.login.ForgotPasswordScreen
+import forgotPassword.ForgotPasswordScreen
 import com.example.gofit.login.LoginScreen
-import com.example.gofit.login.RegistroScreen
-import com.example.gofit.login.StepCountViewModel
+import registro.RegistroScreen
+import home.StepCountViewModel
 import com.example.gofit.ui.theme.GoFitTheme
 import com.google.firebase.auth.FirebaseAuth
 
@@ -60,10 +60,15 @@ class MainActivity : ComponentActivity() {
 
                     val startDestination = if (currentUser != null) "Menu" else "LoginScreen"
                     NavHost(navController = navigationController, startDestination = startDestination) {
-                        composable("LoginScreen") { LoginScreen(viewModel = viewModel(), navigationController) }
+                        composable("LoginScreen") {
+                            LoginScreen(viewModel = viewModel(), navigationController) {
+                                stepCountViewModel.updateUserId()
+
+                            }
+                        }
                         composable("RegistroScreen") { RegistroScreen(viewModel = viewModel(), navigationController) }
                         composable("Menu") { Menu(navigationController, stepCountViewModel ) }
-                        composable("ForgotPassword") { ForgotPasswordScreen(viewModel = viewModel(), navigationController) }
+                        composable("forgotPassword") { ForgotPasswordScreen(viewModel = viewModel()) }
                     }
                 }
             }
@@ -94,6 +99,7 @@ class MainActivity : ComponentActivity() {
         super.onStop()
         stepCountViewModel.saveData()
         stepCountViewModel.saveDataToFirestore()
+
 
     }
 }
