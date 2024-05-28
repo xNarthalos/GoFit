@@ -4,8 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -15,11 +14,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.example.gofit.login.ImageLogo
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ForgotPasswordScreen(viewModel: ForgotPasswordViewModel) {
+fun ForgotPasswordScreen(viewModel: ForgotPasswordViewModel, navigationController: NavHostController) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -48,17 +48,43 @@ fun ForgotPasswordScreen(viewModel: ForgotPasswordViewModel) {
             Spacer(modifier = Modifier.height(16.dp))
             ImageLogo(Modifier.align(Alignment.CenterHorizontally))
             Spacer(modifier = Modifier.height(16.dp))
-            BodyForgot(Modifier.align(Alignment.CenterHorizontally), viewModel)
+            BodyForgot(Modifier.align(Alignment.CenterHorizontally), viewModel, navigationController)
         }
     }
 }
 
-
-
 @Composable
-fun ButtonForgot(loginButtonEnable: Boolean, email: String, viewModel: ForgotPasswordViewModel) {
+fun ButtonForgot(loginButtonEnable: Boolean, email: String, viewModel: ForgotPasswordViewModel, navigationController: NavHostController) {
+    var showDialog by remember { mutableStateOf(false) }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text(text = "Correo Enviado") },
+            text = { Text(text = "Revise su correo electrónico para cambiar su contraseña.") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDialog = false
+                        navigationController.navigate("LoginScreen") {
+                            popUpTo(navigationController.graph.startDestinationId) {
+                                inclusive = true
+                            }
+                            launchSingleTop = true
+                        }
+                    }
+                ) {
+                    Text("OK")
+                }
+            }
+        )
+    }
+
     Button(
-        onClick = { viewModel.resetPassword(email) },
+        onClick = {
+            viewModel.resetPassword(email)
+            showDialog = true
+        },
         enabled = loginButtonEnable,
         modifier = Modifier
             .fillMaxWidth()
@@ -75,7 +101,7 @@ fun ButtonForgot(loginButtonEnable: Boolean, email: String, viewModel: ForgotPas
 }
 
 @Composable
-fun BodyForgot(modifier: Modifier, viewModel: ForgotPasswordViewModel) {
+fun BodyForgot(modifier: Modifier, viewModel: ForgotPasswordViewModel, navigationController: NavHostController) {
     val email: String by viewModel.email.observeAsState(initial = "")
     val loginButtonEnable: Boolean by viewModel.forgotButtonEnable.observeAsState(initial = false)
 
@@ -85,7 +111,7 @@ fun BodyForgot(modifier: Modifier, viewModel: ForgotPasswordViewModel) {
         Spacer(modifier = Modifier.size(42.dp))
         EmailForgot(email) { viewModel.onForgotPasswordChanged(it) }
         Spacer(modifier = Modifier.size(16.dp))
-        ButtonForgot(loginButtonEnable, email, viewModel)
+        ButtonForgot(loginButtonEnable, email, viewModel, navigationController)
     }
 }
 

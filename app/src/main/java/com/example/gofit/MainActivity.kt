@@ -67,7 +67,7 @@ private val menuViewModel : MenuViewModel by viewModels()
                         }
                         composable("RegistroScreen") { RegistroScreen(viewModel = viewModel(), navigationController) }
                         composable("Menu") { Menu(navigationController,menuViewModel) }
-                        composable("forgotPassword") { ForgotPasswordScreen(viewModel = viewModel()) }
+                        composable("forgotPassword") { ForgotPasswordScreen(viewModel = viewModel(),navigationController) }
                     }
                 }
             }

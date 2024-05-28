@@ -169,7 +169,9 @@ fun SocialLogin(viewModel: LoginViewModel, navigationController: NavHostControll
             try {
                 val account = task.getResult(ApiException::class.java)
                 val credential = GoogleAuthProvider.getCredential(account.idToken, null)
-                viewModel.signInWithGoogle(credential,{ navigationController.navigate("Menu") }, onLoginSuccess)
+                viewModel.signInWithGoogle(credential,{  navigationController.navigate("Menu") {
+                    popUpTo("LoginScreen") { inclusive = true }
+                } }, onLoginSuccess)
             } catch (ex: Exception) {
                 Log.d("google", "excepcion al iniciar con google " + ex.localizedMessage)
             }

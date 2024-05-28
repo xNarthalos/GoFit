@@ -61,7 +61,9 @@ class LoginViewModel : ViewModel() {
         auth.signInWithEmailAndPassword(email, password).addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     onLoginSuccess()
-                    navController.navigate("Menu")
+                    navController.navigate("Menu") {
+                        popUpTo("LoginScreen") { inclusive = true }
+                    }
                 } else {
                     _errorMessage.value =
                         "Por favor, comprueba que el email y la contraseña son los correctos."
