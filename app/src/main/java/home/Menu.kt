@@ -174,5 +174,6 @@ fun signOutUser(
             launchSingleTop = true
         }
     }
+    menuViewModel.clearData()
     menuViewModel.updateUserId()
 }

@@ -14,28 +14,22 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-
 @Composable
-fun Entrenamiento(menuViewModel: MenuViewModel) {
-    var isRunning by remember { mutableStateOf(false) }
-    var isPaused by remember { mutableStateOf(false) }
-    var buttonColor by remember { mutableStateOf(Color(0xFF5DCF14)) }
-    var buttonOffset by remember { mutableStateOf(Offset(0f, 0f)) }
-    var isButtonEnabled by remember { mutableStateOf(true) }
+fun Entrenamiento(menuViewModel: MenuViewModel = viewModel()) {
+    val isRunning by menuViewModel.isRunning.observeAsState(false)
+    val isPaused by menuViewModel.isPaused.observeAsState(false)
 
     val pasosCronometro by menuViewModel.pasosCronometro.observeAsState(0)
     val distanciaCronometro by menuViewModel.distanciaCronometro.observeAsState(0f)
     val caloriasCronometro by menuViewModel.caloriasCronometro.observeAsState(0)
     val time by menuViewModel.tiempoCronometro.observeAsState(0L)
 
-    val scope = rememberCoroutineScope()
+    val buttonColor by remember { mutableStateOf(Color(0xFF5DCF14)) }
+    var isButtonEnabled by remember { mutableStateOf(true) }
 
     Column(
         modifier = Modifier
@@ -92,16 +86,7 @@ fun Entrenamiento(menuViewModel: MenuViewModel) {
                             .size(70.dp)
                             .background(Color.Green, shape = CircleShape)
                             .clickable(enabled = isButtonEnabled) {
-                                isPaused = false
-                                buttonColor = Color.Red
-                                buttonOffset = Offset(100f, 0f)
                                 menuViewModel.resumeCronometro()
-                                scope.launch {
-                                    while (isRunning && !isPaused) {
-                                        delay(1000)
-                                        menuViewModel.incrementTime()
-                                    }
-                                }
                             },
                         contentAlignment = Alignment.Center
                     ) {
@@ -117,17 +102,7 @@ fun Entrenamiento(menuViewModel: MenuViewModel) {
                             .size(70.dp)
                             .background(Color.Red, shape = CircleShape)
                             .clickable(enabled = isButtonEnabled) {
-                                scope.launch {
-                                    delay(3000)
-                                    isRunning = false
-                                    isPaused = false
-                                    buttonColor = Color(0xFF6BF711)
-                                    buttonOffset = Offset(0f, 0f)
-                                    isButtonEnabled = false
-                                    delay(1000)
-                                    isButtonEnabled = true
-                                    menuViewModel.resetCronometro()
-                                }
+                                menuViewModel.resetCronometro()
                             },
                         contentAlignment = Alignment.Center
                     ) {
@@ -144,9 +119,6 @@ fun Entrenamiento(menuViewModel: MenuViewModel) {
                             .size(70.dp)
                             .background(Color.Red, shape = CircleShape)
                             .clickable(enabled = isButtonEnabled) {
-                                isPaused = true
-                                buttonColor = Color.Green
-                                buttonOffset = Offset(100f, 0f)
                                 menuViewModel.pauseCronometro()
                             },
                         contentAlignment = Alignment.Center
@@ -165,16 +137,7 @@ fun Entrenamiento(menuViewModel: MenuViewModel) {
                         .size(70.dp)
                         .background(buttonColor, shape = CircleShape)
                         .clickable(enabled = isButtonEnabled) {
-                            isRunning = true
-                            buttonColor = Color.Red
-                            buttonOffset = Offset(100f, 0f)
                             menuViewModel.startCronometro()
-                            scope.launch {
-                                while (isRunning && !isPaused) {
-                                    delay(1000)
-                                    menuViewModel.incrementTime()
-                                }
-                            }
                         },
                     contentAlignment = Alignment.Center
                 ) {
@@ -189,7 +152,6 @@ fun Entrenamiento(menuViewModel: MenuViewModel) {
         }
     }
 }
-
 @Composable
 fun StatCard(title: String, value: String, unit: String, backgroundColor: Color) {
     Card(

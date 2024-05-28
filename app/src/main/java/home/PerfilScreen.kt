@@ -22,14 +22,12 @@ import java.util.Locale
 @Composable
 fun Perfil(menuViewModel: MenuViewModel) {
 
-  /*  DisposableEffect(Unit) {
+   DisposableEffect(Unit) {
         onDispose {
-            viewModel.guardarDatosUsuario()
-            stepCountViewModel.clearData()
-            stepCountViewModel.loadData()
-            stepCountViewModel.loadWeeklyData()
+            menuViewModel.guardarDatosUsuario()
+
         }
-    }*/
+    }
 
     Box(
         modifier = Modifier

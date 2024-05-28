@@ -47,16 +47,16 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            when {
+            when (PackageManager.PERMISSION_GRANTED) {
                 ContextCompat.checkSelfPermission(
                     this,
                     Manifest.permission.ACTIVITY_RECOGNITION
-                ) == PackageManager.PERMISSION_GRANTED -> {
+                ) -> {
                     // Permiso ya concedido
                     menuViewModel.startSensor()
                 }
                 else -> {
-                    // Solicitar permiso
+                    // Solicita permiso
                     requestPermissionLauncher.launch(Manifest.permission.ACTIVITY_RECOGNITION)
                 }
             }

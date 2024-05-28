@@ -16,6 +16,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -51,6 +52,12 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
     private val _distanciaCronometro = MutableLiveData<Float>()
     val distanciaCronometro: LiveData<Float> = _distanciaCronometro
 
+    private val _isRunning = MutableLiveData<Boolean>()
+    val isRunning: LiveData<Boolean> = _isRunning
+
+    private val _isPaused = MutableLiveData<Boolean>()
+    val isPaused: LiveData<Boolean> = _isPaused
+
     // LiveData para almacenar las calorías quemadas con el cronómetro
     private val _caloriasCronometro = MutableLiveData<Int>()
     val caloriasCronometro: LiveData<Int> = _caloriasCronometro
@@ -61,10 +68,6 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
     // Variables para almacenar los pasos iniciales y los pasos del cronómetro iniciales
     private var pasosIniciales: Int? = null
     private var pasosCronometroIniciales: Int = 0
-
-    // Variables para controlar el estado del cronómetro
-    var isCronometroRunning: Boolean = false
-    var isCronometroPaused: Boolean = false
 
     // LiveData para almacenar los datos semanales
     private val _weeklyData = MutableLiveData<List<UserData>>()
@@ -110,6 +113,8 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
         startSensor()
         updateUserId()
         loadUserData()
+        _isRunning.value = false
+        _isPaused.value = false
     }
 
     // Actualiza el ID del usuario y recarga los datos
@@ -133,8 +138,8 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
         _weeklyData.value = emptyList()
         pasosIniciales = null
         pasosCronometroIniciales = 0
-        isCronometroRunning = false
-        isCronometroPaused = false
+        _isRunning.value = false
+        _isPaused.value = false
         _gender.value = null
         _height.value = null
         _weight.value = null
@@ -255,7 +260,7 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
             _calorias.postValue(caloriasQuemadas)
 
             // Actualiza los datos del cronómetro si está corriendo y no está en pausa
-            if (isCronometroRunning && !isCronometroPaused) {
+            if (_isRunning.value == true && _isPaused.value == false) {
                 val pasosCronometroActuales = pasosActuales - pasosCronometroIniciales
                 _pasosCronometro.postValue(pasosCronometroActuales)
 
@@ -271,21 +276,33 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
 
     // Inicia el cronómetro
     fun startCronometro() {
+        _isRunning.value = true
+        _isPaused.value = false
         pasosCronometroIniciales = _pasos.value ?: 0
         _pasosCronometro.value = 0
         _tiempoCronometro.value = 0L
-        isCronometroRunning = true
-        isCronometroPaused = false
+        viewModelScope.launch {
+            while (_isRunning.value == true && _isPaused.value == false) {
+                delay(1000)
+                incrementTime()
+            }
+        }
     }
 
     // Pausa el cronómetro
     fun pauseCronometro() {
-        isCronometroPaused = true
+        _isPaused.value = true
     }
 
     // Reanuda el cronómetro
     fun resumeCronometro() {
-        isCronometroPaused = false
+        _isPaused.value = false
+        viewModelScope.launch {
+            while (_isRunning.value == true && _isPaused.value == false) {
+                delay(1000)
+                incrementTime()
+            }
+        }
     }
 
     // Resetea el cronómetro
@@ -296,20 +313,20 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
         _distanciaCronometro.value = 0f
         _caloriasCronometro.value = 0
         _tiempoCronometro.value = 0L
-        isCronometroRunning = false
-        isCronometroPaused = false
+        _isRunning.value = false
+        _isPaused.value = false
     }
 
-    // Incrementa el tiempo del cronómetro en 1 unidad (asumimos segundos)
+    // Incrementa el tiempo del cronómetro en un segundo
     fun incrementTime() {
         _tiempoCronometro.postValue((_tiempoCronometro.value ?: 0L) + 1L)
     }
 
 
-    // Maneja los cambios en la precisión del sensor (no usado aquí)
+    // Maneja los cambios en la precisión del sensor(no se usa)
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 
-    // Desregistrar el listener del sensor cuando el ViewModel se destruye
+    // Paramos el listener del sensor cuando el ViewModel se destruye
     override fun onCleared() {
         super.onCleared()
         saveDataToFirestore()
