@@ -3,14 +3,18 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.Manifest
+import android.app.AlertDialog
+import android.content.Intent
+import android.net.Uri
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import androidx.core.app.ActivityCompat
+import android.provider.Settings
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
@@ -26,26 +30,37 @@ import registro.RegistroScreen
 
 class MainActivity : ComponentActivity() {
 
-    private val ACTIVITY_RECOGNITION_REQUEST_CODE = 100
+    private val menuViewModel: MenuViewModel by viewModels()
 
-private val menuViewModel : MenuViewModel by viewModels()
+
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            menuViewModel.startSensor()
+        } else {
+            showPermissionWarning()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACTIVITY_RECOGNITION)
-                != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(
+            when {
+                ContextCompat.checkSelfPermission(
                     this,
-                    arrayOf(Manifest.permission.ACTIVITY_RECOGNITION),
-                    ACTIVITY_RECOGNITION_REQUEST_CODE
-                )
+                    Manifest.permission.ACTIVITY_RECOGNITION
+                ) == PackageManager.PERMISSION_GRANTED -> {
+                    // Permiso ya concedido
+                    menuViewModel.startSensor()
+                }
+                else -> {
+                    // Solicitar permiso
+                    requestPermissionLauncher.launch(Manifest.permission.ACTIVITY_RECOGNITION)
+                }
             }
         }
-
 
         setContent {
             GoFitTheme {
@@ -62,31 +77,35 @@ private val menuViewModel : MenuViewModel by viewModels()
                         composable("LoginScreen") {
                             LoginScreen(viewModel = viewModel(), navigationController) {
                                 menuViewModel.updateUserId()
-
                             }
                         }
                         composable("RegistroScreen") { RegistroScreen(viewModel = viewModel(), navigationController) }
-                        composable("Menu") { Menu(navigationController,menuViewModel) }
-                        composable("forgotPassword") { ForgotPasswordScreen(viewModel = viewModel(),navigationController) }
+                        composable("Menu") { Menu(navigationController, menuViewModel) }
+                        composable("forgotPassword") { ForgotPasswordScreen(viewModel = viewModel(), navigationController) }
                     }
                 }
             }
         }
     }
 
-    @Deprecated("Deprecated in Java")
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == ACTIVITY_RECOGNITION_REQUEST_CODE) {
-            if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                menuViewModel.startSensor()
+    private fun showPermissionWarning() {
+        AlertDialog.Builder(this)
+            .setTitle("Permiso necesario")
+            .setMessage("La aplicación necesita permiso para reconocer tu actividad física para funcionar correctamente. Por favor, habilita el permiso en los ajustes.")
+            .setPositiveButton("Abrir ajustes") { dialog, _ ->
+                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                    data = Uri.fromParts("package", packageName, null)
+                }
+                startActivity(intent)
+                dialog.dismiss()
             }
-        }
+            .setNegativeButton("Cancelar") { dialog, _ ->
+                dialog.dismiss()
+
+            }
+            .show()
     }
+
 
     override fun onPause() {
         super.onPause()
@@ -96,12 +115,8 @@ private val menuViewModel : MenuViewModel by viewModels()
 
     override fun onStop() {
         super.onStop()
-
         menuViewModel.saveData()
         menuViewModel.saveDataToFirestore()
-
-
-
     }
 
     override fun onDestroy() {
@@ -109,5 +124,3 @@ private val menuViewModel : MenuViewModel by viewModels()
         menuViewModel.stopSensor()
     }
 }
-
-
