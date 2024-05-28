@@ -23,17 +23,17 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
-fun Entrenamiento(stepCountViewModel: StepCountViewModel = viewModel()) {
+fun Entrenamiento(menuViewModel: MenuViewModel) {
     var isRunning by remember { mutableStateOf(false) }
     var isPaused by remember { mutableStateOf(false) }
     var buttonColor by remember { mutableStateOf(Color(0xFF5DCF14)) }
     var buttonOffset by remember { mutableStateOf(Offset(0f, 0f)) }
     var isButtonEnabled by remember { mutableStateOf(true) }
 
-    val pasosCronometro by stepCountViewModel.pasosCronometro.observeAsState(0)
-    val distanciaCronometro by stepCountViewModel.distanciaCronometro.observeAsState(0f)
-    val caloriasCronometro by stepCountViewModel.caloriasCronometro.observeAsState(0)
-    val time by stepCountViewModel.tiempoCronometro.observeAsState(0L)
+    val pasosCronometro by menuViewModel.pasosCronometro.observeAsState(0)
+    val distanciaCronometro by menuViewModel.distanciaCronometro.observeAsState(0f)
+    val caloriasCronometro by menuViewModel.caloriasCronometro.observeAsState(0)
+    val time by menuViewModel.tiempoCronometro.observeAsState(0L)
 
     val scope = rememberCoroutineScope()
 
@@ -95,11 +95,11 @@ fun Entrenamiento(stepCountViewModel: StepCountViewModel = viewModel()) {
                                 isPaused = false
                                 buttonColor = Color.Red
                                 buttonOffset = Offset(100f, 0f)
-                                stepCountViewModel.resumeCronometro()
+                                menuViewModel.resumeCronometro()
                                 scope.launch {
                                     while (isRunning && !isPaused) {
                                         delay(1000)
-                                        stepCountViewModel.incrementTime()
+                                        menuViewModel.incrementTime()
                                     }
                                 }
                             },
@@ -126,7 +126,7 @@ fun Entrenamiento(stepCountViewModel: StepCountViewModel = viewModel()) {
                                     isButtonEnabled = false
                                     delay(1000)
                                     isButtonEnabled = true
-                                    stepCountViewModel.resetCronometro()
+                                    menuViewModel.resetCronometro()
                                 }
                             },
                         contentAlignment = Alignment.Center
@@ -147,7 +147,7 @@ fun Entrenamiento(stepCountViewModel: StepCountViewModel = viewModel()) {
                                 isPaused = true
                                 buttonColor = Color.Green
                                 buttonOffset = Offset(100f, 0f)
-                                stepCountViewModel.pauseCronometro()
+                                menuViewModel.pauseCronometro()
                             },
                         contentAlignment = Alignment.Center
                     ) {
@@ -168,11 +168,11 @@ fun Entrenamiento(stepCountViewModel: StepCountViewModel = viewModel()) {
                             isRunning = true
                             buttonColor = Color.Red
                             buttonOffset = Offset(100f, 0f)
-                            stepCountViewModel.startCronometro()
+                            menuViewModel.startCronometro()
                             scope.launch {
                                 while (isRunning && !isPaused) {
                                     delay(1000)
-                                    stepCountViewModel.incrementTime()
+                                    menuViewModel.incrementTime()
                                 }
                             }
                         },

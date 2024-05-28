@@ -1,4 +1,4 @@
-/* package home
+package home
 
 import android.app.Application
 import android.content.Context
@@ -15,11 +15,12 @@ import com.example.gofit.data.UserData
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
-class StepCountViewModel(application: Application) : AndroidViewModel(application), SensorEventListener {
+class MenuViewModel(application: Application) : AndroidViewModel(application), SensorEventListener {
 
     // Inicializa el SensorManager para gestionar sensores del dispositivo
     private val sensorManager: SensorManager = application.getSystemService(Context.SENSOR_SERVICE) as SensorManager
@@ -79,19 +80,46 @@ class StepCountViewModel(application: Application) : AndroidViewModel(applicatio
     // Instancia de Firestore
     private val firestore = FirebaseFirestore.getInstance()
 
+    // LiveData para los datos del perfil
+    private val _uid = MutableLiveData<String?>()
+    val uid: LiveData<String?> = _uid
+
+    private val _gender = MutableLiveData<String?>()
+    val gender: LiveData<String?> = _gender
+
+    private val _height = MutableLiveData<Float?>()
+    val height: LiveData<Float?> = _height
+
+    private val _weight = MutableLiveData<Float?>()
+    val weight: LiveData<Float?> = _weight
+
+    private val _birthDate = MutableLiveData<Calendar?>()
+    val birthDate: LiveData<Calendar?> = _birthDate
+
+    private val _heightSliderDialogOpen = MutableLiveData(false)
+    val heightSliderDialogOpen: LiveData<Boolean> = _heightSliderDialogOpen
+
+    private val _weightSliderDialogOpen = MutableLiveData(false)
+    val weightSliderDialogOpen: LiveData<Boolean> = _weightSliderDialogOpen
+
+    private val _showDatePickerDialog = MutableLiveData(false)
+    val showDatePickerDialog: LiveData<Boolean> = _showDatePickerDialog
+
     // Bloque de inicialización, inicia el sensor y carga los datos del usuario
     init {
         startSensor()
         updateUserId()
+        loadUserData()
     }
 
     // Actualiza el ID del usuario y recarga los datos
     fun updateUserId() {
-        clearData()
         userId = FirebaseAuth.getInstance().currentUser?.uid
+        _uid.value = userId
         loadData()
         loadWeeklyData()
         loadMostRecentEntrenamiento()
+        loadUserData()
     }
     // Limpia los datos del ViewModel
     fun clearData() {
@@ -107,6 +135,10 @@ class StepCountViewModel(application: Application) : AndroidViewModel(applicatio
         pasosCronometroIniciales = 0
         isCronometroRunning = false
         isCronometroPaused = false
+        _gender.value = null
+        _height.value = null
+        _weight.value = null
+        _birthDate.value = null
     }
 
 
@@ -206,9 +238,8 @@ class StepCountViewModel(application: Application) : AndroidViewModel(applicatio
             if (pasosIniciales == null) {
                 _pasos.value?.let {
                     pasosIniciales = pasosTotales - it
-                } ?: run {
-                    pasosIniciales = pasosTotales
                 }
+
             }
 
             // Calcula los pasos actuales
@@ -286,7 +317,7 @@ class StepCountViewModel(application: Application) : AndroidViewModel(applicatio
     }
 
 
-     fun saveDataToFirestore() {
+    fun saveDataToFirestore() {
         userId?.let { uid ->
             val userDocRef = firestore.collection("usuarios").document(userId!!)
             val userData = hashMapOf(
@@ -331,6 +362,70 @@ class StepCountViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
+    // Métodos del perfil de usuario
 
+    fun setGender(gender: String) {
+        _gender.value = gender
+    }
+
+    fun setHeight(height: Float) {
+        _height.value = height
+    }
+
+    fun setWeight(weight: Float) {
+        _weight.value = weight
+    }
+
+    fun setBirthDate(calendar: Calendar) {
+        _birthDate.value = calendar
+    }
+
+    fun toggleHeightSliderDialog(open: Boolean) {
+        _heightSliderDialogOpen.value = open
+    }
+
+    fun toggleWeightSliderDialog(open: Boolean) {
+        _weightSliderDialogOpen.value = open
+    }
+
+    fun toggleDatePickerDialog(open: Boolean) {
+        _showDatePickerDialog.value = open
+    }
+
+    fun guardarDatosUsuario() {
+        val uid = _uid.value ?: return
+        val altura = _height.value
+        val peso = _weight.value
+        val fechaDeNacimiento = _birthDate.value?.let {
+            SimpleDateFormat("yyyy/MM/dd", Locale.getDefault()).format(it.time)
+        }
+        val genero = _gender.value
+
+        val datosUsuario = hashMapOf(
+            "altura" to altura,
+            "peso" to peso,
+            "fechaDeNacimiento" to fechaDeNacimiento,
+            "genero" to genero
+        )
+
+        firestore.collection("usuarios").document(uid).set(datosUsuario, SetOptions.merge())
+    }
+
+    private fun loadUserData() {
+        val uid = _uid.value ?: return
+        val docRef = firestore.collection("usuarios").document(uid)
+        docRef.get().addOnSuccessListener { document ->
+            if (document != null) {
+                _gender.value = document.getString("genero")
+                _height.value = document.getDouble("altura")?.toFloat()
+                _weight.value = document.getDouble("peso")?.toFloat()
+                val fechaDeNacimientoStr = document.getString("fechaDeNacimiento")
+                if (fechaDeNacimientoStr != null) {
+                    val calendar = Calendar.getInstance()
+                    calendar.time = SimpleDateFormat("yyyy/MM/dd", Locale.getDefault()).parse(fechaDeNacimientoStr)!!
+                    _birthDate.value = calendar
+                }
+            }
+        }
+    }
 }
-*/

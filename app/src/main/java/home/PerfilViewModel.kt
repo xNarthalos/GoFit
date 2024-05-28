@@ -1,4 +1,4 @@
-package home
+/* package home
 
 import android.app.Application
 import android.util.Log
@@ -116,3 +116,4 @@ class PerfilViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 }
+*/

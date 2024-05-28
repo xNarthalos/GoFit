@@ -14,7 +14,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -26,10 +25,13 @@ import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Menu(navigationController: NavHostController, stepCountViewModel: StepCountViewModel) {
+fun Menu(
+    navigationController: NavHostController,
+    menuViewModel: MenuViewModel ) {
     val auth = FirebaseAuth.getInstance()
     val innerNavController = rememberNavController()
-    val perfilViewModel: PerfilViewModel = viewModel()
+
+
 
     Scaffold(
         topBar = {
@@ -42,11 +44,11 @@ fun Menu(navigationController: NavHostController, stepCountViewModel: StepCountV
             }
             MyTopAppBar(
                 title = title,
-                onSignOut = { signOutUser(auth, navigationController,stepCountViewModel) }
+                onSignOut = { signOutUser(auth, navigationController,menuViewModel) }
             )
         },
         bottomBar = {
-            MyBottomNavigation(innerNavController,stepCountViewModel)
+            MyBottomNavigation(innerNavController,menuViewModel)
         }
     ) { innerPadding ->
         NavHost(
@@ -54,9 +56,9 @@ fun Menu(navigationController: NavHostController, stepCountViewModel: StepCountV
             startDestination = "home",
             Modifier.padding(innerPadding)
         ) {
-            composable("home") { Inicio(stepCountViewModel) }
-            composable("Ruta") { Entrenamiento(stepCountViewModel) }
-            composable("Perfil") { Perfil(perfilViewModel) }
+            composable("home") { Inicio(menuViewModel) }
+            composable("Ruta") { Entrenamiento(menuViewModel) }
+            composable("Perfil") { Perfil(menuViewModel) }
         }
     }
 }
@@ -100,13 +102,13 @@ fun MyTopAppBar(
 
 
 @Composable
-fun MyBottomNavigation(navigationController: NavHostController,stepCountViewModel: StepCountViewModel) {
+fun MyBottomNavigation(navigationController: NavHostController,menuViewModel: MenuViewModel) {
     var index by remember { mutableStateOf(0) }
     NavigationBar(containerColor = Color(0xFF5DCF14)) {
         NavigationBarItem(
             selected = index == 0,
             onClick = {
-                stepCountViewModel.saveData()
+                menuViewModel.saveData()
                 index = 0
                 navigationController.navigate("home") {
                     popUpTo(navigationController.graph.startDestinationId) {
@@ -123,7 +125,7 @@ fun MyBottomNavigation(navigationController: NavHostController,stepCountViewMode
         NavigationBarItem(
             selected = index == 1,
             onClick = {
-                stepCountViewModel.saveData()
+                menuViewModel.saveData()
                 index = 1
                 navigationController.navigate("Ruta") {
                     popUpTo(navigationController.graph.startDestinationId) {
@@ -140,7 +142,7 @@ fun MyBottomNavigation(navigationController: NavHostController,stepCountViewMode
         NavigationBarItem(
             selected = index == 2,
             onClick = {
-                stepCountViewModel.saveData()
+                menuViewModel.saveData()
                 index = 2
                 navigationController.navigate("Perfil") {
                     popUpTo(navigationController.graph.startDestinationId) {
@@ -160,7 +162,7 @@ fun MyBottomNavigation(navigationController: NavHostController,stepCountViewMode
 fun signOutUser(
     auth: FirebaseAuth,
     navigationController: NavHostController,
-    stepCountViewModel: StepCountViewModel
+    menuViewModel: MenuViewModel
 ) {
     auth.signOut()
 
@@ -172,5 +174,5 @@ fun signOutUser(
             launchSingleTop = true
         }
     }
-    stepCountViewModel.updateUserId()
+    menuViewModel.updateUserId()
 }

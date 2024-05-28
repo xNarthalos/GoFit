@@ -14,17 +14,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
 @Composable
-fun Perfil(viewModel: PerfilViewModel) {
-    DisposableEffect(Unit) {
+fun Perfil(menuViewModel: MenuViewModel) {
+
+  /*  DisposableEffect(Unit) {
         onDispose {
             viewModel.guardarDatosUsuario()
+            stepCountViewModel.clearData()
+            stepCountViewModel.loadData()
+            stepCountViewModel.loadWeeklyData()
         }
-    }
+    }*/
 
     Box(
         modifier = Modifier
@@ -77,7 +82,7 @@ fun Perfil(viewModel: PerfilViewModel) {
                         )
                         Divider(color = Color.White, thickness = 1.dp)
                         Spacer(modifier = Modifier.height(16.dp))
-                        UserDataFields(viewModel)
+                        UserDataFields(menuViewModel)
                     }
                 }
             }
@@ -169,14 +174,14 @@ fun DaylyGoal() {
 }
 
 @Composable
-fun UserDataFields(viewModel: PerfilViewModel) {
-    val gender by viewModel.gender.observeAsState()
-    val height by viewModel.height.observeAsState()
-    val weight by viewModel.weight.observeAsState()
-    val birthDate by viewModel.birthDate.observeAsState()
-    val heightSliderDialogOpen by viewModel.heightSliderDialogOpen.observeAsState(false)
-    val weightSliderDialogOpen by viewModel.weightSliderDialogOpen.observeAsState(false)
-    val showDatePickerDialog by viewModel.showDatePickerDialog.observeAsState(false)
+fun UserDataFields(menuViewModel: MenuViewModel) {
+    val gender by menuViewModel.gender.observeAsState()
+    val height by menuViewModel.height.observeAsState()
+    val weight by menuViewModel.weight.observeAsState()
+    val birthDate by menuViewModel.birthDate.observeAsState()
+    val heightSliderDialogOpen by menuViewModel.heightSliderDialogOpen.observeAsState(false)
+    val weightSliderDialogOpen by menuViewModel.weightSliderDialogOpen.observeAsState(false)
+    val showDatePickerDialog by menuViewModel.showDatePickerDialog.observeAsState(false)
 
     var expanded by remember { mutableStateOf(false) }
     val genderOptions = listOf("Hombre", "Mujer")
@@ -208,7 +213,7 @@ fun UserDataFields(viewModel: PerfilViewModel) {
                 onDismissRequest = { expanded = false }) {
                 genderOptions.forEach { option ->
                     DropdownMenuItem(onClick = {
-                        viewModel.setGender(option)
+                        menuViewModel.setGender(option)
                         expanded = false
                     }, text = { Text(text = option, color = Color.White) })
                 }
@@ -228,7 +233,7 @@ fun UserDataFields(viewModel: PerfilViewModel) {
                 .padding(bottom = 8.dp)
         ) {
             OutlinedButton(
-                onClick = { viewModel.toggleHeightSliderDialog(true) },
+                onClick = { menuViewModel.toggleHeightSliderDialog(true) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp),
                 border = BorderStroke(1.dp, Color.White)
@@ -239,7 +244,7 @@ fun UserDataFields(viewModel: PerfilViewModel) {
         if (heightSliderDialogOpen) {
             var tempHeight by remember { mutableStateOf(height ?: 160f) }
             AlertDialog(
-                onDismissRequest = { viewModel.toggleHeightSliderDialog(false) },
+                onDismissRequest = { menuViewModel.toggleHeightSliderDialog(false) },
                 title = { Text(text = "Selecciona tu altura") },
                 text = {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -278,12 +283,12 @@ fun UserDataFields(viewModel: PerfilViewModel) {
                 },
                 confirmButton = {
                     TextButton(onClick = {
-                        viewModel.setHeight(tempHeight)
-                        viewModel.toggleHeightSliderDialog(false)
+                        menuViewModel.setHeight(tempHeight)
+                        menuViewModel.toggleHeightSliderDialog(false)
                     }) { Text("Aceptar") }
                 },
                 dismissButton = {
-                    TextButton(onClick = { viewModel.toggleHeightSliderDialog(false) }) { Text("Cancelar") }
+                    TextButton(onClick = { menuViewModel.toggleHeightSliderDialog(false) }) { Text("Cancelar") }
                 })
         }
 
@@ -300,7 +305,7 @@ fun UserDataFields(viewModel: PerfilViewModel) {
                 .padding(bottom = 8.dp)
         ) {
             OutlinedButton(
-                onClick = { viewModel.toggleWeightSliderDialog(true) },
+                onClick = { menuViewModel.toggleWeightSliderDialog(true) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp),
                 border = BorderStroke(1.dp, Color.White)
@@ -311,7 +316,7 @@ fun UserDataFields(viewModel: PerfilViewModel) {
         if (weightSliderDialogOpen) {
             var tempWeight by remember { mutableStateOf(weight ?: 60f) }
             AlertDialog(
-                onDismissRequest = { viewModel.toggleWeightSliderDialog(false) },
+                onDismissRequest = { menuViewModel.toggleWeightSliderDialog(false) },
                 title = { Text(text = "Selecciona tu peso") },
                 text = {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -350,12 +355,12 @@ fun UserDataFields(viewModel: PerfilViewModel) {
                 },
                 confirmButton = {
                     TextButton(onClick = {
-                        viewModel.setWeight(tempWeight)
-                        viewModel.toggleWeightSliderDialog(false)
+                        menuViewModel.setWeight(tempWeight)
+                        menuViewModel.toggleWeightSliderDialog(false)
                     }) { Text("Aceptar") }
                 },
                 dismissButton = {
-                    TextButton(onClick = { viewModel.toggleWeightSliderDialog(false) }) { Text("Cancelar") }
+                    TextButton(onClick = { menuViewModel.toggleWeightSliderDialog(false) }) { Text("Cancelar") }
                 })
         }
 
@@ -372,7 +377,7 @@ fun UserDataFields(viewModel: PerfilViewModel) {
                 .padding(bottom = 8.dp)
         ) {
             OutlinedButton(
-                onClick = { viewModel.toggleDatePickerDialog(true) },
+                onClick = { menuViewModel.toggleDatePickerDialog(true) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp),
                 border = BorderStroke(1.dp, Color.White)
@@ -387,11 +392,11 @@ fun UserDataFields(viewModel: PerfilViewModel) {
         }
         if (showDatePickerDialog) {
             DatePickerDialog(
-                onDismissRequest = { viewModel.toggleDatePickerDialog(false) },
+                onDismissRequest = { menuViewModel.toggleDatePickerDialog(false) },
                 initialDate = birthDate ?: Calendar.getInstance(),
                 onDateSelected = { nuevaFecha ->
-                    viewModel.setBirthDate(nuevaFecha)
-                    viewModel.toggleDatePickerDialog(false)
+                    menuViewModel.setBirthDate(nuevaFecha)
+                    menuViewModel.toggleDatePickerDialog(false)
                 })
         }
     }

@@ -1,6 +1,4 @@
 package com.example.gofit
-
-import home.Menu
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -18,18 +16,19 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import forgotPassword.ForgotPasswordScreen
 import com.example.gofit.login.LoginScreen
-import registro.RegistroScreen
-import home.StepCountViewModel
 import com.example.gofit.ui.theme.GoFitTheme
 import com.google.firebase.auth.FirebaseAuth
+import forgotPassword.ForgotPasswordScreen
+import home.Menu
+import home.MenuViewModel
+import registro.RegistroScreen
 
 class MainActivity : ComponentActivity() {
 
     private val ACTIVITY_RECOGNITION_REQUEST_CODE = 100
 
-    private val stepCountViewModel: StepCountViewModel by viewModels()
+private val menuViewModel : MenuViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,12 +61,12 @@ class MainActivity : ComponentActivity() {
                     NavHost(navController = navigationController, startDestination = startDestination) {
                         composable("LoginScreen") {
                             LoginScreen(viewModel = viewModel(), navigationController) {
-                                stepCountViewModel.updateUserId()
+                                menuViewModel.updateUserId()
 
                             }
                         }
                         composable("RegistroScreen") { RegistroScreen(viewModel = viewModel(), navigationController) }
-                        composable("Menu") { Menu(navigationController, stepCountViewModel ) }
+                        composable("Menu") { Menu(navigationController,menuViewModel) }
                         composable("forgotPassword") { ForgotPasswordScreen(viewModel = viewModel()) }
                     }
                 }
@@ -84,23 +83,30 @@ class MainActivity : ComponentActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == ACTIVITY_RECOGNITION_REQUEST_CODE) {
             if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                stepCountViewModel.startSensor()
+                menuViewModel.startSensor()
             }
         }
     }
 
     override fun onPause() {
         super.onPause()
-        stepCountViewModel.saveData()
-        stepCountViewModel.saveDataToFirestore()
+        menuViewModel.saveData()
+        menuViewModel.saveDataToFirestore()
     }
 
     override fun onStop() {
         super.onStop()
-        stepCountViewModel.saveData()
-        stepCountViewModel.saveDataToFirestore()
+
+        menuViewModel.saveData()
+        menuViewModel.saveDataToFirestore()
 
 
+
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        menuViewModel.stopSensor()
     }
 }
 

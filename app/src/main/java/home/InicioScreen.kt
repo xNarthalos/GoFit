@@ -20,14 +20,18 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 @Composable
-fun Inicio(stepCountViewModel: StepCountViewModel = viewModel()) {
+fun Inicio(menuViewModel: MenuViewModel) {
 
-    val pasos by stepCountViewModel.pasos.observeAsState(0)
-    val calorias by stepCountViewModel.calorias.observeAsState(0)
-    val distancia by stepCountViewModel.distancia.observeAsState(0f)
-    val weeklyData by stepCountViewModel.weeklyData.observeAsState(emptyList())
+    val pasos by menuViewModel.pasos.observeAsState(0)
+    val calorias by menuViewModel.calorias.observeAsState(0)
+    val distancia by menuViewModel.distancia.observeAsState(0f)
+    val weeklyData by menuViewModel.weeklyData.observeAsState(emptyList())
 
     val todayDayName = SimpleDateFormat("EEEE", Locale.getDefault()).format(Date()).take(1).uppercase()
+    LaunchedEffect(Unit) {
+        menuViewModel.loadMostRecentEntrenamiento()
+        menuViewModel.loadData()
+    }
 
     LazyColumn(
         modifier = Modifier
@@ -75,6 +79,8 @@ fun Inicio(stepCountViewModel: StepCountViewModel = viewModel()) {
                 todayValue = String.format("%.2f", distancia),
                 todayDayName = todayDayName
             )
+            Spacer(modifier = Modifier.height(16.dp))
+            MostRecentEntrenamientoCard(menuViewModel)
         }
     }
 }
@@ -174,6 +180,56 @@ fun WeeklyCard(
                         )
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun MostRecentEntrenamientoCard(menuViewModel: MenuViewModel) {
+    val mostRecentEntrenamiento by menuViewModel.mostRecentEntrenamiento.observeAsState()
+
+    mostRecentEntrenamiento?.let { data ->
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight(),
+            shape = RoundedCornerShape(10.dp),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF6BF711))
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Último Entrenamiento",
+                    color = Color.White,
+                    fontSize = 18.sp,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                Text(
+                    text = "Pasos: ${data["steps"]}",
+                    color = Color.White,
+                    fontSize = 14.sp
+                )
+                Text(
+                    text = "Distancia: ${String.format("%.2f", data["distance"] as Double)} km",
+                    color = Color.White,
+                    fontSize = 14.sp
+                )
+                Text(
+                    text = "Calorías: ${data["calories"]} kcal",
+                    color = Color.White,
+                    fontSize = 14.sp
+                )
+                Text(
+                    text = "Tiempo: ${data["time"]} segundos",
+                    color = Color.White,
+                    fontSize = 14.sp
+                )
             }
         }
     }
