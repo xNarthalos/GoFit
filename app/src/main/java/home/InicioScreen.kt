@@ -13,7 +13,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.gofit.data.UserData
 import com.example.gofit.data.WeeklyDayData
 import java.text.SimpleDateFormat
@@ -21,16 +20,27 @@ import java.util.*
 
 @Composable
 fun Inicio(menuViewModel: MenuViewModel) {
-
     val pasos by menuViewModel.pasos.observeAsState(0)
     val calorias by menuViewModel.calorias.observeAsState(0)
     val distancia by menuViewModel.distancia.observeAsState(0f)
     val weeklyData by menuViewModel.weeklyData.observeAsState(emptyList())
 
-    val todayDayName = SimpleDateFormat("EEEE", Locale.getDefault()).format(Date()).take(1).uppercase()
+    val dayAbbreviations = mapOf(
+        "lunes" to "L",
+        "martes" to "M",
+        "miércoles" to "X",
+        "jueves" to "J",
+        "viernes" to "V",
+        "sábado" to "S",
+        "domingo" to "D"
+    )
+    val todayDayName = SimpleDateFormat("EEEE", Locale.getDefault()).format(Date()).lowercase(Locale.getDefault())
+    val todayDayAbbreviation = dayAbbreviations[todayDayName] ?: ""
+
     LaunchedEffect(Unit) {
         menuViewModel.loadMostRecentEntrenamiento()
         menuViewModel.loadData()
+        menuViewModel.loadWeeklyData()
     }
 
     LazyColumn(
@@ -61,29 +71,30 @@ fun Inicio(menuViewModel: MenuViewModel) {
             Spacer(modifier = Modifier.height(16.dp))
             WeeklyCard(
                 title = "Pasos Semanales",
-                weeklyDayData = generateWeeklySummary(weeklyData, "steps", pasos, todayDayName),
+                weeklyDayData = generateWeeklySummary(weeklyData, "steps", pasos, todayDayAbbreviation),
                 todayValue = pasos.toString(),
-                todayDayName = todayDayName
+                todayDayName = todayDayAbbreviation
             )
             Spacer(modifier = Modifier.height(16.dp))
             WeeklyCard(
                 title = "Calorías Semanales Quemadas",
-                weeklyDayData = generateWeeklySummary(weeklyData, "calories", calorias, todayDayName),
+                weeklyDayData = generateWeeklySummary(weeklyData, "calories", calorias, todayDayAbbreviation),
                 todayValue = calorias.toString(),
-                todayDayName = todayDayName
+                todayDayName = todayDayAbbreviation
             )
             Spacer(modifier = Modifier.height(16.dp))
             WeeklyCard(
                 title = "Distancia Semanal",
-                weeklyDayData = generateWeeklySummary(weeklyData, "distance", String.format("%.2f", distancia), todayDayName),
+                weeklyDayData = generateWeeklySummary(weeklyData, "distance", String.format("%.2f", distancia), todayDayAbbreviation),
                 todayValue = String.format("%.2f", distancia),
-                todayDayName = todayDayName
+                todayDayName = todayDayAbbreviation
             )
             Spacer(modifier = Modifier.height(16.dp))
             MostRecentEntrenamientoCard(menuViewModel)
         }
     }
 }
+
 @Composable
 fun DailyCard(title: String, todayValue: String, unit: String) {
     Card(
@@ -118,8 +129,6 @@ fun DailyCard(title: String, todayValue: String, unit: String) {
     }
 }
 
-
-
 @Composable
 fun WeeklyCard(
     title: String,
@@ -153,7 +162,7 @@ fun WeeklyCard(
                 text = title,
                 color = Color.White,
                 fontSize = 19.sp,
-                modifier = Modifier.padding(bottom = 8.dp),
+                modifier = Modifier.padding(bottom  = 8.dp),
                 textAlign = TextAlign.Center
             )
             Row(
@@ -234,6 +243,7 @@ fun MostRecentEntrenamientoCard(menuViewModel: MenuViewModel) {
         }
     }
 }
+
 fun generateWeeklySummary(
     weeklyDayData: List<UserData>,
     dataType: String,
@@ -242,7 +252,6 @@ fun generateWeeklySummary(
 ): List<WeeklyDayData> {
     val dayAbbreviations = listOf("L", "M", "X", "J", "V", "S", "D")
     val fullWeekData = mutableListOf<WeeklyDayData>()
-
     dayAbbreviations.forEachIndexed { index, day ->
         val dataForDay = weeklyDayData.getOrNull(index)
         val value = when {
@@ -254,6 +263,5 @@ fun generateWeeklySummary(
         }
         fullWeekData.add(WeeklyDayData(day, value))
     }
-
     return fullWeekData
 }

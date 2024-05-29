@@ -22,7 +22,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class MenuViewModel(application: Application) : AndroidViewModel(application), SensorEventListener {
-
     // Inicializa el SensorManager para gestionar sensores del dispositivo
     private val sensorManager: SensorManager = application.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     // Obtiene el sensor de conteo de pasos
@@ -116,7 +115,6 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
         _isRunning.value = false
         _isPaused.value = false
     }
-
     // Actualiza el ID del usuario y recarga los datos
     fun updateUserId() {
         userId = FirebaseAuth.getInstance().currentUser?.uid
@@ -145,8 +143,6 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
         _weight.value = null
         _birthDate.value = null
     }
-
-
     // Carga los datos del usuario desde la base de datos
     fun loadData() {
         userId?.let { uid ->
@@ -166,7 +162,6 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
             }
         }
     }
-
     // Guarda los datos del usuario en la base de datos
     fun saveData() {
         userId?.let { uid ->
@@ -192,14 +187,11 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
             }
         }
     }
-
-
     fun loadWeeklyData() {
         val (startDate, endDate) = getCurrentWeekDates()
         getWeeklyData(startDate, endDate)
     }
 
-    // Ajusta la función getWeeklyData para obtener los datos semanales
     fun getWeeklyData(startDate: String, endDate: String) {
         userId?.let { uid ->
             viewModelScope.launch {
@@ -208,10 +200,9 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
             }
         }
     }
-
-    // Calcula las fechas de lunes a domingo de la semana actual
     fun getCurrentWeekDates(): Pair<String, String> {
         val calendar = Calendar.getInstance()
+        calendar.firstDayOfWeek = Calendar.MONDAY
         while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
             calendar.add(Calendar.DAY_OF_WEEK, -1)
         }
@@ -220,10 +211,6 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
         val endDate = dateFormat.format(calendar.time)
         return Pair(startDate, endDate)
     }
-
-
-
-
     fun startSensor() {
         stepCountSensor?.also { sensor ->
             sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_UI)
@@ -233,8 +220,7 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
         sensorManager.unregisterListener(this)
     }
 
-
-    // Maneja los cambios en el sensor de pasos
+    // Manejamos los cambios en el sensor de pasos
     override fun onSensorChanged(event: SensorEvent?) {
         if (event?.sensor?.type == Sensor.TYPE_STEP_COUNTER) {
             val pasosTotales = event.values[0].toInt()
@@ -272,8 +258,6 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
             }
         }
     }
-
-
     // Inicia el cronómetro
     fun startCronometro() {
         _isRunning.value = true
@@ -288,12 +272,10 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
             }
         }
     }
-
     // Pausa el cronómetro
     fun pauseCronometro() {
         _isPaused.value = true
     }
-
     // Reanuda el cronómetro
     fun resumeCronometro() {
         _isPaused.value = false
@@ -304,7 +286,6 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
             }
         }
     }
-
     // Resetea el cronómetro
     fun resetCronometro() {
         saveCronometroDataToFirestore()
@@ -321,8 +302,6 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
     fun incrementTime() {
         _tiempoCronometro.postValue((_tiempoCronometro.value ?: 0L) + 1L)
     }
-
-
     // Maneja los cambios en la precisión del sensor(no se usa)
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 
@@ -332,8 +311,6 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
         saveDataToFirestore()
         stopSensor()
     }
-
-
     fun saveDataToFirestore() {
         userId?.let { uid ->
             val userDocRef = firestore.collection("usuarios").document(userId!!)
@@ -347,7 +324,6 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
 
         }
     }
-
     fun saveCronometroDataToFirestore() {
         userId?.let { uid ->
             val userDocRef = firestore.collection("usuarios").document(uid)
@@ -361,7 +337,6 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
             userDocRef.collection("datosEntrenamiento").add(cronometroData)
         }
     }
-
     fun loadMostRecentEntrenamiento() {
         userId?.let { uid ->
             val userDocRef = firestore.collection("usuarios").document(uid)
@@ -380,35 +355,27 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
     }
 
     // Métodos del perfil de usuario
-
     fun setGender(gender: String) {
         _gender.value = gender
     }
-
     fun setHeight(height: Float) {
         _height.value = height
     }
-
     fun setWeight(weight: Float) {
         _weight.value = weight
     }
-
     fun setBirthDate(calendar: Calendar) {
         _birthDate.value = calendar
     }
-
     fun toggleHeightSliderDialog(open: Boolean) {
         _heightSliderDialogOpen.value = open
     }
-
     fun toggleWeightSliderDialog(open: Boolean) {
         _weightSliderDialogOpen.value = open
     }
-
     fun toggleDatePickerDialog(open: Boolean) {
         _showDatePickerDialog.value = open
     }
-
     fun guardarDatosUsuario() {
         val uid = _uid.value ?: return
         val altura = _height.value
@@ -417,7 +384,6 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
             SimpleDateFormat("yyyy/MM/dd", Locale.getDefault()).format(it.time)
         }
         val genero = _gender.value
-
         val datosUsuario = hashMapOf(
             "altura" to altura,
             "peso" to peso,
@@ -427,7 +393,6 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
 
         firestore.collection("usuarios").document(uid).set(datosUsuario, SetOptions.merge())
     }
-
     private fun loadUserData() {
         val uid = _uid.value ?: return
         val docRef = firestore.collection("usuarios").document(uid)
