@@ -19,7 +19,7 @@ abstract class GoFitDatabase : RoomDatabase() {
                     context.applicationContext,
                     GoFitDatabase::class.java,
                     "gofit_database"
-                )// Esta línea permite recrear la base de datos si hay un cambio en el esquema
+                )
                     .fallbackToDestructiveMigration()
 
                     .build()

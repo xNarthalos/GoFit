@@ -1,5 +1,7 @@
 package home
 
+import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -10,9 +12,12 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.gofit.R
 import com.example.gofit.data.UserData
 import com.example.gofit.data.WeeklyDayData
 import java.text.SimpleDateFormat
@@ -24,6 +29,8 @@ fun Inicio(menuViewModel: MenuViewModel) {
     val calorias by menuViewModel.calorias.observeAsState(0)
     val distancia by menuViewModel.distancia.observeAsState(0f)
     val weeklyData by menuViewModel.weeklyData.observeAsState(emptyList())
+    val puntuacion by menuViewModel.puntuacion.observeAsState(0)
+    val puntuacionTotal by menuViewModel.puntuacionTotal.observeAsState(0)
 
     val dayAbbreviations = mapOf(
         "lunes" to "L",
@@ -41,6 +48,7 @@ fun Inicio(menuViewModel: MenuViewModel) {
         menuViewModel.loadMostRecentEntrenamiento()
         menuViewModel.loadData()
         menuViewModel.loadWeeklyData()
+        menuViewModel.loadTotalScore()
     }
 
     LazyColumn(
@@ -54,19 +62,29 @@ fun Inicio(menuViewModel: MenuViewModel) {
             DailyCard(
                 title = "Pasos hoy",
                 todayValue = pasos.toString(),
-                unit = "pasos"
+                unit = "pasos",
+                iconResId = R.drawable.footprint
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            DailyCard(
+                title = "Puntuación",
+                todayValue = puntuacionTotal.toString(),
+                unit = "puntos",
+                iconResId = R.drawable.rewarded
             )
             Spacer(modifier = Modifier.height(16.dp))
             DailyCard(
                 title = "Calorías quemadas hoy",
                 todayValue = calorias.toString(),
-                unit = "kcal"
+                unit = "kcal",
+                iconResId = R.drawable.local_fire_department
             )
             Spacer(modifier = Modifier.height(16.dp))
             DailyCard(
                 title = "Distancia recorrida hoy",
                 todayValue = String.format("%.2f", distancia),
-                unit = "km"
+                unit = "km",
+                iconResId = R.drawable.world
             )
             Spacer(modifier = Modifier.height(16.dp))
             WeeklyCard(
@@ -96,13 +114,13 @@ fun Inicio(menuViewModel: MenuViewModel) {
 }
 
 @Composable
-fun DailyCard(title: String, todayValue: String, unit: String) {
+fun DailyCard(title: String, todayValue: String, unit: String, iconResId: Int) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight(),
         shape = RoundedCornerShape(10.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF6BF711))
+        colors = CardDefaults.cardColors(containerColor = colorResource(id = R.color.verdeClaro))
     ) {
         Column(
             modifier = Modifier
@@ -118,13 +136,23 @@ fun DailyCard(title: String, todayValue: String, unit: String) {
                 modifier = Modifier.padding(bottom = 8.dp),
                 textAlign = TextAlign.Center
             )
-            Text(
-                text = "$todayValue $unit",
-                color = Color.White,
-                fontSize = 14.sp,
-                style = MaterialTheme.typography.headlineMedium,
-                textAlign = TextAlign.Center
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "$todayValue $unit",
+                    color = Color.White,
+                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.headlineMedium,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Image(
+                    painter = painterResource(id = iconResId),
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
         }
     }
 }
@@ -149,7 +177,7 @@ fun WeeklyCard(
             .fillMaxWidth()
             .wrapContentHeight(),
         shape = RoundedCornerShape(10.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF6BF711))
+        colors = CardDefaults.cardColors(containerColor =  colorResource(id = R.color.verdeClaro))
     ) {
         Column(
             modifier = Modifier
@@ -204,7 +232,7 @@ fun MostRecentEntrenamientoCard(menuViewModel: MenuViewModel) {
                 .fillMaxWidth()
                 .wrapContentHeight(),
             shape = RoundedCornerShape(10.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFF6BF711))
+            colors = CardDefaults.cardColors(containerColor =  colorResource(id = R.color.verdeClaro))
         ) {
             Column(
                 modifier = Modifier
@@ -244,6 +272,9 @@ fun MostRecentEntrenamientoCard(menuViewModel: MenuViewModel) {
     }
 }
 
+
+
+
 fun generateWeeklySummary(
     weeklyDayData: List<UserData>,
     dataType: String,
@@ -252,16 +283,40 @@ fun generateWeeklySummary(
 ): List<WeeklyDayData> {
     val dayAbbreviations = listOf("L", "M", "X", "J", "V", "S", "D")
     val fullWeekData = mutableListOf<WeeklyDayData>()
-    dayAbbreviations.forEachIndexed { index, day ->
-        val dataForDay = weeklyDayData.getOrNull(index)
-        val value = when {
-            day.equals(todayDayName, ignoreCase = true) -> todayValue?.toString() ?: "0"
-            dataType == "steps" -> dataForDay?.steps?.toString() ?: "0"
-            dataType == "calories" -> dataForDay?.calories?.toString() ?: "0"
-            dataType == "distance" -> dataForDay?.distance?.let { "%.2f".format(it) } ?: "0"
+    val tempData = mutableMapOf<String, String>()
+
+    val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+    val calendar = Calendar.getInstance()
+
+    // Mapear los datos almacenados a sus abreviaciones correctas
+    weeklyDayData.forEach { data ->
+        calendar.time = dateFormat.parse(data.date)!!
+        val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
+        val dayAbbreviation = dayAbbreviations[(dayOfWeek + 5) % 7] // Ajuste para que domingo sea el último día
+        tempData[dayAbbreviation] = when (dataType) {
+            "steps" -> data.steps.toString()
+            "calories" -> data.calories.toString()
+            "distance" -> "%.2f".format(data.distance)
             else -> "0"
         }
-        fullWeekData.add(WeeklyDayData(day, value))
     }
+
+    // Asignar el valor de todayValue al día de hoy y valores almacenados a los otros días
+    for (day in dayAbbreviations) {
+        val value = if (day == todayDayName) {
+            todayValue?.toString() ?: "0"
+        } else {
+            tempData[day] ?: "0"
+        }
+        fullWeekData.add(WeeklyDayData(day, value))
+
+        // Añadir log para ver el valor de cada día de la semana
+        Log.d("WeeklySummary", "Day: $day, Value: $value")
+    }
+
+    // Ordenar la lista final en el orden de lunes a domingo
+    fullWeekData.sortBy { dayAbbreviations.indexOf(it.dayName) }
+
     return fullWeekData
 }
+

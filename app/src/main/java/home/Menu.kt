@@ -1,5 +1,6 @@
 package home
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -13,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -76,7 +78,7 @@ fun MyTopAppBar(
     TopAppBar(
         title = { Text(text = title) },
         colors = TopAppBarDefaults.smallTopAppBarColors(
-            containerColor = Color(0xFF5DCF14),
+            containerColor =  colorResource(id = R.color.verdeOscuro),
             titleContentColor = Color.White,
         ),
         actions = {
@@ -89,7 +91,8 @@ fun MyTopAppBar(
             }
             DropdownMenu(
                 expanded = menuExpanded.value,
-                onDismissRequest = { menuExpanded.value = false }
+                onDismissRequest = { menuExpanded.value = false },
+                modifier = Modifier.background(colorResource(id = R.color.verdeOscuro)),
             ) {
                 DropdownMenuItem(onClick = {
                     onSignOut()
@@ -104,7 +107,7 @@ fun MyTopAppBar(
 @Composable
 fun MyBottomNavigation(navigationController: NavHostController,menuViewModel: MenuViewModel) {
     var index by remember { mutableStateOf(0) }
-    NavigationBar(containerColor = Color(0xFF5DCF14)) {
+    NavigationBar(containerColor = colorResource(id = R.color.verdeOscuro)) {
         NavigationBarItem(
             selected = index == 0,
             onClick = {
@@ -174,6 +177,7 @@ fun signOutUser(
             launchSingleTop = true
         }
     }
-    menuViewModel.clearData()
-    menuViewModel.updateUserId()
+    menuViewModel.stopSensor()
+    menuViewModel.saveData()
+    menuViewModel.saveDataToFirestore()
 }

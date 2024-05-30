@@ -9,12 +9,14 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.example.gofit.R
 import com.example.gofit.login.ImageLogo
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -34,7 +36,7 @@ fun ForgotPasswordScreen(viewModel: ForgotPasswordViewModel, navigationControlle
                     )
                 },
                 colors = TopAppBarDefaults.smallTopAppBarColors(
-                    containerColor = Color(0xFF5DCF14)
+                    containerColor = colorResource(id = R.color.verdeOscuro)
                 )
             )
         }
@@ -90,8 +92,8 @@ fun ButtonForgot(loginButtonEnable: Boolean, email: String, viewModel: ForgotPas
             .fillMaxWidth()
             .padding(6.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = Color(0xFF5DCF14),
-            disabledContainerColor = Color(0xFF5DCF14),
+            containerColor = colorResource(id = R.color.verdeClaro),
+            disabledContainerColor = colorResource(id = R.color.verdeClaro),
             contentColor = Color.White,
             disabledContentColor = Color.White
         )

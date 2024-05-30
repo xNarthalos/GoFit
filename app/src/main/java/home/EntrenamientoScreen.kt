@@ -1,23 +1,31 @@
 package home
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DirectionsRun
+import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.gofit.R
+
 @Composable
 fun Entrenamiento(menuViewModel: MenuViewModel = viewModel()) {
     val isRunning by menuViewModel.isRunning.observeAsState(false)
@@ -27,8 +35,8 @@ fun Entrenamiento(menuViewModel: MenuViewModel = viewModel()) {
     val distanciaCronometro by menuViewModel.distanciaCronometro.observeAsState(0f)
     val caloriasCronometro by menuViewModel.caloriasCronometro.observeAsState(0)
     val time by menuViewModel.tiempoCronometro.observeAsState(0L)
-
-    val buttonColor by remember { mutableStateOf(Color(0xFF5DCF14)) }
+    val verdeClaro = colorResource(id = R.color.verdeClaro)
+    val buttonColor = remember { mutableStateOf(verdeClaro) }
     var isButtonEnabled by remember { mutableStateOf(true) }
 
     Column(
@@ -43,7 +51,8 @@ fun Entrenamiento(menuViewModel: MenuViewModel = viewModel()) {
             title = "Pasos dados",
             value = pasosCronometro.toString(),
             unit = "pasos",
-            backgroundColor = Color(0xFF6BF711)
+            backgroundColor = verdeClaro,
+            icon =R.drawable.footprint
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -52,7 +61,8 @@ fun Entrenamiento(menuViewModel: MenuViewModel = viewModel()) {
             title = "Calorías quemadas",
             value = caloriasCronometro.toString(),
             unit = "kcal",
-            backgroundColor = Color(0xFF6BF711)
+            backgroundColor = verdeClaro,
+            icon = R.drawable.local_fire_department
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -61,7 +71,8 @@ fun Entrenamiento(menuViewModel: MenuViewModel = viewModel()) {
             title = "Tiempo activo",
             value = "${time / 60} minutos : ${time % 60} segundos",
             unit = "",
-            backgroundColor = Color(0xFF6BF711)
+            backgroundColor = verdeClaro,
+            icon = R.drawable.timer
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -70,7 +81,8 @@ fun Entrenamiento(menuViewModel: MenuViewModel = viewModel()) {
             title = "Distancia recorrida",
             value = String.format("%.2f", distanciaCronometro),
             unit = "km",
-            backgroundColor = Color(0xFF6BF711)
+            backgroundColor = verdeClaro,
+            icon = R.drawable.world
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -84,7 +96,7 @@ fun Entrenamiento(menuViewModel: MenuViewModel = viewModel()) {
                     Box(
                         modifier = Modifier
                             .size(70.dp)
-                            .background(Color.Green, shape = CircleShape)
+                            .background(buttonColor.value, shape = CircleShape)
                             .clickable(enabled = isButtonEnabled) {
                                 menuViewModel.resumeCronometro()
                             },
@@ -100,7 +112,7 @@ fun Entrenamiento(menuViewModel: MenuViewModel = viewModel()) {
                     Box(
                         modifier = Modifier
                             .size(70.dp)
-                            .background(Color.Red, shape = CircleShape)
+                            .background(colorResource(id = R.color.rojoOscuro), shape = CircleShape)
                             .clickable(enabled = isButtonEnabled) {
                                 menuViewModel.resetCronometro()
                             },
@@ -117,7 +129,7 @@ fun Entrenamiento(menuViewModel: MenuViewModel = viewModel()) {
                     Box(
                         modifier = Modifier
                             .size(70.dp)
-                            .background(Color.Red, shape = CircleShape)
+                            .background(colorResource(id = R.color.rojoOscuro), shape = CircleShape)
                             .clickable(enabled = isButtonEnabled) {
                                 menuViewModel.pauseCronometro()
                             },
@@ -135,7 +147,7 @@ fun Entrenamiento(menuViewModel: MenuViewModel = viewModel()) {
                 Box(
                     modifier = Modifier
                         .size(70.dp)
-                        .background(buttonColor, shape = CircleShape)
+                        .background(buttonColor.value, shape = CircleShape)
                         .clickable(enabled = isButtonEnabled) {
                             menuViewModel.startCronometro()
                         },
@@ -152,8 +164,15 @@ fun Entrenamiento(menuViewModel: MenuViewModel = viewModel()) {
         }
     }
 }
+
 @Composable
-fun StatCard(title: String, value: String, unit: String, backgroundColor: Color) {
+fun StatCard(
+    title: String,
+    value: String,
+    unit: String,
+    backgroundColor: Color,
+    icon: Int
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -174,12 +193,22 @@ fun StatCard(title: String, value: String, unit: String, backgroundColor: Color)
                 fontSize = 18.sp,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
-            Text(
-                text = "$value $unit",
-                color = Color.White,
-                fontSize = 14.sp,
-                style = MaterialTheme.typography.headlineMedium
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "$value $unit",
+                    color = Color.White,
+                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.headlineMedium
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Image(
+                    painter = painterResource(id = icon),
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
         }
     }
 }

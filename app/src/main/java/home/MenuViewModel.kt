@@ -6,6 +6,7 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -107,6 +108,15 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
     private val _showDatePickerDialog = MutableLiveData(false)
     val showDatePickerDialog: LiveData<Boolean> = _showDatePickerDialog
 
+    // LiveData para almacenar la puntuación
+    private val _puntuacion = MutableLiveData<Int>()
+    val puntuacion: LiveData<Int> = _puntuacion
+
+    private val _puntuacionTotal = MutableLiveData<Int>()
+    val puntuacionTotal: LiveData<Int> = _puntuacionTotal
+
+    private val objetivoDiario = 10000
+
     // Bloque de inicialización, inicia el sensor y carga los datos del usuario
     init {
         startSensor()
@@ -114,16 +124,24 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
         loadUserData()
         _isRunning.value = false
         _isPaused.value = false
+        _puntuacion.value = 0
     }
+
+
     // Actualiza el ID del usuario y recarga los datos
     fun updateUserId() {
+
         userId = FirebaseAuth.getInstance().currentUser?.uid
         _uid.value = userId
-        loadData()
-        loadWeeklyData()
-        loadMostRecentEntrenamiento()
-        loadUserData()
+        if (userId != null) {
+            loadData()
+            loadWeeklyData()
+            loadMostRecentEntrenamiento()
+            loadUserData()
+            loadTotalScore()
+        }
     }
+
     // Limpia los datos del ViewModel
     fun clearData() {
         _pasos.value = 0
@@ -153,11 +171,13 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
                     _pasos.postValue(userData.steps)
                     _distancia.postValue(userData.distance)
                     _calorias.postValue(userData.calories)
+                    actualizarPuntuacion(userData.steps)
                 }
                 else {
                     _pasos.postValue(0)
                     _distancia.postValue(0f)
                     _calorias.postValue(0)
+                    _puntuacionTotal.postValue(0)
                 }
             }
         }
@@ -170,10 +190,12 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
                 val newSteps = _pasos.value ?: 0
                 val newDistance = _distancia.value ?: 0f
                 val newCalories = _calorias.value ?: 0
+                val newScore = _puntuacion.value ?: 0 // Obtener la puntuación actual
 
                 val finalSteps = existingData?.steps?.let { if (newSteps > it) newSteps else it } ?: newSteps
                 val finalDistance = existingData?.distance?.let { if (newDistance > it) newDistance else it } ?: newDistance
                 val finalCalories = existingData?.calories?.let { if (newCalories > it) newCalories else it } ?: newCalories
+                val finalScore = existingData?.score?.let { if (newScore > it) newScore else it } ?: newScore
 
                 userDataDao.insert(
                     UserData(
@@ -181,7 +203,8 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
                         date = currentDate,
                         steps = finalSteps,
                         distance = finalDistance,
-                        calories = finalCalories
+                        calories = finalCalories,
+                        score = finalScore
                     )
                 )
             }
@@ -200,17 +223,17 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
             }
         }
     }
+
     fun getCurrentWeekDates(): Pair<String, String> {
         val calendar = Calendar.getInstance()
         calendar.firstDayOfWeek = Calendar.MONDAY
-        while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
-            calendar.add(Calendar.DAY_OF_WEEK, -1)
-        }
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
         val startDate = dateFormat.format(calendar.time)
         calendar.add(Calendar.DAY_OF_WEEK, 6)
         val endDate = dateFormat.format(calendar.time)
         return Pair(startDate, endDate)
     }
+
     fun startSensor() {
         stepCountSensor?.also { sensor ->
             sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_UI)
@@ -222,6 +245,11 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
 
     // Manejamos los cambios en el sensor de pasos
     override fun onSensorChanged(event: SensorEvent?) {
+        if (userId == null) {
+            stopSensor()
+            return
+        }
+
         if (event?.sensor?.type == Sensor.TYPE_STEP_COUNTER) {
             val pasosTotales = event.values[0].toInt()
 
@@ -230,7 +258,6 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
                 _pasos.value?.let {
                     pasosIniciales = pasosTotales - it
                 }
-
             }
 
             // Calcula los pasos actuales
@@ -244,6 +271,8 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
             // Calcula las calorías quemadas
             val caloriasQuemadas = (pasosActuales * 0.05f).toInt()
             _calorias.postValue(caloriasQuemadas)
+
+            actualizarPuntuacion(pasosActuales)
 
             // Actualiza los datos del cronómetro si está corriendo y no está en pausa
             if (_isRunning.value == true && _isPaused.value == false) {
@@ -318,7 +347,8 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
                 "date" to currentDate,
                 "steps" to (_pasos.value ?: 0),
                 "distance" to (_distancia.value ?: 0f),
-                "calories" to (_calorias.value ?: 0)
+                "calories" to (_calorias.value ?: 0),
+                "score" to (_puntuacionTotal.value ?: 0)
             )
             userDocRef.collection("datos").document(currentDate).set(userData)
 
@@ -410,4 +440,35 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
             }
         }
     }
+
+    private fun actualizarPuntuacion(pasos: Int) {
+        // Calcular puntos por pasos 200 pasos equivalen a 1 punto
+        val puntosPorPasos = (pasos / 200)
+
+        // Calcular puntos por alcanzar el objetivo
+        val puntosPorObjetivo = if (pasos >= objetivoDiario) {
+            100 + ((pasos - objetivoDiario) / 200)
+        } else {
+            0
+        }
+
+        // Sumar los puntos totales
+        val totalPuntos = puntosPorPasos + puntosPorObjetivo
+        _puntuacion.postValue(totalPuntos)
+
+
+        Log.d("MenuViewModel", "Pasos: $pasos, Puntos por pasos: $puntosPorPasos, Puntos por objetivo: $puntosPorObjetivo, Total puntos: $totalPuntos")
+    }
+
+    fun loadTotalScore() {
+        userId?.let { uid ->
+            viewModelScope.launch {
+                val totalScore = userDataDao.getTotalScore(uid) ?: 0
+                _puntuacionTotal.postValue(totalScore)
+            }
+        }
+    }
+
+
+
 }

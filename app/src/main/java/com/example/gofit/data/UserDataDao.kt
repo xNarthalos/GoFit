@@ -17,6 +17,9 @@ interface UserDataDao {
     @Query("SELECT * FROM user_data WHERE userId = :userId AND date = :date")
     suspend fun getUserDataByDate(userId: String, date: String): UserData?
 
+    @Query("SELECT SUM(score) FROM user_data WHERE userId = :uid")
+    suspend fun getTotalScore(uid: String): Int?
+
     @Query("SELECT * FROM user_data WHERE userId = :userId")
     suspend fun getAllUserData(userId: String): List<UserData>
 

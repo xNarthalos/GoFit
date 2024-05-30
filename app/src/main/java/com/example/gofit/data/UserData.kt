@@ -8,5 +8,6 @@ data class UserData(
     val date: String,
     val steps: Int,
     val distance: Float,
-    val calories: Int
+    val calories: Int,
+    val score: Int
 )

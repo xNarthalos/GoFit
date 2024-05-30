@@ -37,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -69,7 +70,7 @@ fun RegistroScreen(viewModel: RegistroViewModel, navigationController: NavHostCo
                     )
                 },
                 colors = TopAppBarDefaults.smallTopAppBarColors(
-                    containerColor = Color(0xFF5DCF14)
+                    containerColor = colorResource(id = R.color.verdeOscuro)
                 )
             )
         }
@@ -160,8 +161,8 @@ fun BotonRegistro(registroEnable: Boolean, email :String, password: String, view
             .fillMaxWidth()
             .padding(6.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = Color(0xFF5DCF14),
-            disabledContainerColor = Color(0xFF5DCF14),
+            containerColor =colorResource(id = R.color.verdeClaro),
+            disabledContainerColor = colorResource(id = R.color.verdeClaro),
             contentColor = Color.White,
             disabledContentColor = Color.White
         )

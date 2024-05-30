@@ -12,9 +12,11 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.gofit.R
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -42,7 +44,7 @@ fun Perfil(menuViewModel: MenuViewModel) {
             item {
                 Card(
                     shape = RoundedCornerShape(10.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFF6BF711)),
+                    colors = CardDefaults.cardColors(containerColor =  colorResource(id = R.color.verdeClaro)),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(8.dp)
@@ -64,7 +66,7 @@ fun Perfil(menuViewModel: MenuViewModel) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Card(
                     shape = RoundedCornerShape(10.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFF6BF711)),
+                    colors = CardDefaults.cardColors(containerColor =  colorResource(id = R.color.verdeClaro)),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(8.dp)
@@ -207,7 +209,7 @@ fun UserDataFields(menuViewModel: MenuViewModel) {
             }
             DropdownMenu(
                 expanded = expanded,
-                modifier = Modifier.background(Color(0xFF6BF711)),
+                modifier = Modifier.background( colorResource(id = R.color.verdeClaro)),
                 onDismissRequest = { expanded = false }) {
                 genderOptions.forEach { option ->
                     DropdownMenuItem(onClick = {

@@ -37,7 +37,7 @@ class MainActivity : ComponentActivity() {
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
         if (isGranted) {
-            menuViewModel.startSensor()
+           // menuViewModel.startSensor()
         } else {
             showPermissionWarning()
         }
@@ -53,7 +53,7 @@ class MainActivity : ComponentActivity() {
                     Manifest.permission.ACTIVITY_RECOGNITION
                 ) -> {
                     // Permiso ya concedido
-                    menuViewModel.startSensor()
+                   // menuViewModel.startSensor()
                 }
                 else -> {
                     // Solicita permiso
@@ -77,6 +77,8 @@ class MainActivity : ComponentActivity() {
                         composable("LoginScreen") {
                             LoginScreen(viewModel = viewModel(), navigationController) {
                                 menuViewModel.updateUserId()
+                                menuViewModel.startSensor()
+
                             }
                         }
                         composable("RegistroScreen") { RegistroScreen(viewModel = viewModel(), navigationController) }
