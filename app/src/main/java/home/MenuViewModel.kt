@@ -97,6 +97,9 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
     private val _weight = MutableLiveData<Float?>()
     val weight: LiveData<Float?> = _weight
 
+    private val _userName = MutableLiveData<String>()
+    val userName: LiveData<String> = _userName
+
     private val _birthDate = MutableLiveData<Calendar?>()
     val birthDate: LiveData<Calendar?> = _birthDate
 
@@ -140,6 +143,23 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
             loadMostRecentEntrenamiento()
             loadUserData()
             loadTotalScore()
+            loadUserName()
+        }
+    }
+
+
+    fun loadUserName() {
+        userId?.let { uid ->
+            val docRef = firestore.collection("usuarios").document(uid)
+            docRef.get().addOnSuccessListener { document ->
+                if (document != null && document.contains("usuario")) {
+                    _userName.value = document.getString("usuario")
+                } else {
+                    _userName.value = "Usuario"
+                }
+            }.addOnFailureListener {
+                _userName.value = "Usuario"
+            }
         }
     }
 

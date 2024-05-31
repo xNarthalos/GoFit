@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -16,6 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -32,6 +35,7 @@ fun Menu(
     menuViewModel: MenuViewModel ) {
     val auth = FirebaseAuth.getInstance()
     val innerNavController = rememberNavController()
+    val userName by menuViewModel.userName.observeAsState()
 
 
 
@@ -39,13 +43,14 @@ fun Menu(
         topBar = {
             val currentBackStackEntry by innerNavController.currentBackStackEntryAsState()
             val title = when (currentBackStackEntry?.destination?.route ?: "GoFit") {
-                "Ruta" -> "GoFit - Entrenamiento"
+                "Ruta" -> "GoFit - Ruta"
                 "Perfil" -> "GoFit - Perfil"
                 "home" -> "GoFit - Inicio"
                 else -> "GoFit"
             }
             MyTopAppBar(
                 title = title,
+                userName = userName,
                 onSignOut = { signOutUser(auth, navigationController,menuViewModel) }
             )
         },
@@ -71,12 +76,27 @@ fun Menu(
 @Composable
 fun MyTopAppBar(
     title: String,
+    userName: String?,
     onSignOut: () -> Unit
 ) {
     val menuExpanded = remember { mutableStateOf(false) }
 
     TopAppBar(
-        title = { Text(text = title) },
+        title = {
+            Row {
+                Text(
+                    text = title,
+                   fontSize = 16.sp,
+                    color = Color.White
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = userName ?: "Usuario",
+                     fontSize = 16.sp,
+                    color = Color.White
+                )
+            }
+        },
         colors = TopAppBarDefaults.smallTopAppBarColors(
             containerColor =  colorResource(id = R.color.verdeOscuro),
             titleContentColor = Color.White,
