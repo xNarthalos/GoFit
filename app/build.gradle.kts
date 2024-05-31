@@ -67,14 +67,14 @@ dependencies {
     implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.compose.runtime:runtime-livedata:1.6.6")
     implementation("androidx.navigation:navigation-compose:2.7.7")
-    implementation(platform("com.google.firebase:firebase-bom:33.0.0"))
+    implementation(platform("com.google.firebase:firebase-bom:32.8.1"))
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-firestore-ktx")
 
 
 
      //Servicio de Google
-    implementation("com.google.android.gms:play-services-auth:21.1.1")
+    implementation("com.google.android.gms:play-services-auth:21.0.0")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
