@@ -17,6 +17,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -243,47 +244,48 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
         sensorManager.unregisterListener(this)
     }
 
-    // Manejamos los cambios en el sensor de pasos
     override fun onSensorChanged(event: SensorEvent?) {
-        if (userId == null) {
-            stopSensor()
-            return
-        }
-
-        if (event?.sensor?.type == Sensor.TYPE_STEP_COUNTER) {
-            val pasosTotales = event.values[0].toInt()
-
-            // Inicializa pasosIniciales si es la primera vez que se ejecuta
-            if (pasosIniciales == null) {
-                _pasos.value?.let {
-                    pasosIniciales = pasosTotales - it
-                }
+        viewModelScope.launch(Dispatchers.Main) {
+            if (userId == null) {
+                stopSensor()
+                return@launch
             }
 
-            // Calcula los pasos actuales
-            val pasosActuales = pasosTotales - (pasosIniciales ?: pasosTotales)
-            _pasos.postValue(pasosActuales)
+            if (event?.sensor?.type == Sensor.TYPE_STEP_COUNTER) {
+                val pasosTotales = event.values[0].toInt()
 
-            // Calcula la distancia recorrida (en kilómetros)
-            val distanciaRecorrida = pasosActuales * 0.762f / 1000
-            _distancia.postValue(distanciaRecorrida)
+                // Inicializa pasosIniciales si es la primera vez que se ejecuta
+                if (pasosIniciales == null) {
+                    _pasos.value?.let {
+                        pasosIniciales = pasosTotales - it
+                    }
+                }
 
-            // Calcula las calorías quemadas
-            val caloriasQuemadas = (pasosActuales * 0.05f).toInt()
-            _calorias.postValue(caloriasQuemadas)
+                // Calcula los pasos actuales
+                val pasosActuales = pasosTotales - (pasosIniciales ?: pasosTotales)
+                _pasos.value = pasosActuales
 
-            actualizarPuntuacion(pasosActuales)
+                // Calcula la distancia recorrida (en kilómetros)
+                val distanciaRecorrida = pasosActuales * 0.762f / 1000
+                _distancia.value = distanciaRecorrida
 
-            // Actualiza los datos del cronómetro si está corriendo y no está en pausa
-            if (_isRunning.value == true && _isPaused.value == false) {
-                val pasosCronometroActuales = pasosActuales - pasosCronometroIniciales
-                _pasosCronometro.postValue(pasosCronometroActuales)
+                // Calcula las calorías quemadas
+                val caloriasQuemadas = (pasosActuales * 0.05f).toInt()
+                _calorias.value = caloriasQuemadas
 
-                val distanciaCronometro = pasosCronometroActuales * 0.762f / 1000
-                _distanciaCronometro.postValue(distanciaCronometro)
+                actualizarPuntuacion(pasosActuales)
 
-                val caloriasCronometro = (pasosCronometroActuales * 0.05f).toInt()
-                _caloriasCronometro.postValue(caloriasCronometro)
+                // Actualiza los datos del cronómetro si está corriendo y no está en pausa
+                if (_isRunning.value == true && _isPaused.value == false) {
+                    val pasosCronometroActuales = pasosActuales - pasosCronometroIniciales
+                    _pasosCronometro.value = pasosCronometroActuales
+
+                    val distanciaCronometro = pasosCronometroActuales * 0.762f / 1000
+                    _distanciaCronometro.value = distanciaCronometro
+
+                    val caloriasCronometro = (pasosCronometroActuales * 0.05f).toInt()
+                    _caloriasCronometro.value = caloriasCronometro
+                }
             }
         }
     }

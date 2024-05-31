@@ -177,7 +177,8 @@ fun signOutUser(
             launchSingleTop = true
         }
     }
-    menuViewModel.stopSensor()
     menuViewModel.saveData()
     menuViewModel.saveDataToFirestore()
+    menuViewModel.clearData()
+    menuViewModel.updateUserId()
 }

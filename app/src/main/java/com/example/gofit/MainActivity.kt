@@ -36,9 +36,7 @@ class MainActivity : ComponentActivity() {
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
-        if (isGranted) {
-           // menuViewModel.startSensor()
-        } else {
+        if (!isGranted) {
             showPermissionWarning()
         }
     }
@@ -53,7 +51,7 @@ class MainActivity : ComponentActivity() {
                     Manifest.permission.ACTIVITY_RECOGNITION
                 ) -> {
                     // Permiso ya concedido
-                   // menuViewModel.startSensor()
+                    menuViewModel.startSensor()
                 }
                 else -> {
                     // Solicita permiso
