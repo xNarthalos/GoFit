@@ -131,7 +131,7 @@ fun MyBottomNavigation(navigationController: NavHostController,menuViewModel: Me
         NavigationBarItem(
             selected = index == 0,
             onClick = {
-                menuViewModel.saveData()
+
                 index = 0
                 navigationController.navigate("home") {
                     popUpTo(navigationController.graph.startDestinationId) {
@@ -148,7 +148,7 @@ fun MyBottomNavigation(navigationController: NavHostController,menuViewModel: Me
         NavigationBarItem(
             selected = index == 1,
             onClick = {
-                menuViewModel.saveData()
+
                 index = 1
                 navigationController.navigate("Ruta") {
                     popUpTo(navigationController.graph.startDestinationId) {
@@ -165,7 +165,7 @@ fun MyBottomNavigation(navigationController: NavHostController,menuViewModel: Me
         NavigationBarItem(
             selected = index == 2,
             onClick = {
-                menuViewModel.saveData()
+
                 index = 2
                 navigationController.navigate("Perfil") {
                     popUpTo(navigationController.graph.startDestinationId) {
@@ -188,6 +188,7 @@ fun signOutUser(
     menuViewModel: MenuViewModel
 ) {
     auth.signOut()
+    menuViewModel.stopSensor()
 
     if (auth.currentUser == null) {
         navigationController.navigate("LoginScreen") {
@@ -197,7 +198,7 @@ fun signOutUser(
             launchSingleTop = true
         }
     }
-    menuViewModel.saveData()
+
     menuViewModel.saveDataToFirestore()
     menuViewModel.clearData()
     menuViewModel.updateUserId()

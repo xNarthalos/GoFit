@@ -20,6 +20,7 @@ import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -124,6 +125,7 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
     // Bloque de inicialización, inicia el sensor y carga los datos del usuario
     init {
         startSensor()
+
         updateUserId()
         loadUserData()
         _isRunning.value = false
@@ -138,7 +140,6 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
         userId = FirebaseAuth.getInstance().currentUser?.uid
         _uid.value = userId
         if (userId != null) {
-            loadData()
             loadWeeklyData()
             loadMostRecentEntrenamiento()
             loadUserData()
@@ -183,49 +184,30 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
         _birthDate.value = null
     }
     // Carga los datos del usuario desde la base de datos
-    fun loadData() {
-        userId?.let { uid ->
-            viewModelScope.launch {
-                val userData = userDataDao.getUserDataByDate(uid, currentDate)
-                if (userData != null) {
-                    // Establecemos los datos iniciales
-                    _pasos.postValue(userData.steps)
-                    _distancia.postValue(userData.distance)
-                    _calorias.postValue(userData.calories)
+    private suspend fun loadData(): UserData? {
+        return userId?.let { uid ->
+            userDataDao.getUserDataByDate(uid, currentDate)?.also { userData ->
+                withContext(Dispatchers.Main) {
+                    pasosManuales = userData.steps
+                    _pasos.value = userData.steps
+                    _distancia.value = userData.distance
+                    _calorias.value = userData.calories
                     actualizarPuntuacion(userData.steps)
-                }
-                else {
-                    _pasos.postValue(0)
-                    _distancia.postValue(0f)
-                    _calorias.postValue(0)
-                    _puntuacionTotal.postValue(0)
                 }
             }
         }
     }
-    // Guarda los datos del usuario en la base de datos
-    fun saveData() {
+    fun saveData(pasos: Int, distancia: Float, calorias: Int) {
         userId?.let { uid ->
-            viewModelScope.launch {
-                val existingData = userDataDao.getUserDataByDate(uid, currentDate)
-                val newSteps = _pasos.value ?: 0
-                val newDistance = _distancia.value ?: 0f
-                val newCalories = _calorias.value ?: 0
-                val newScore = _puntuacion.value ?: 0 // Obtener la puntuación actual
-
-                val finalSteps = existingData?.steps?.let { if (newSteps > it) newSteps else it } ?: newSteps
-                val finalDistance = existingData?.distance?.let { if (newDistance > it) newDistance else it } ?: newDistance
-                val finalCalories = existingData?.calories?.let { if (newCalories > it) newCalories else it } ?: newCalories
-                val finalScore = existingData?.score?.let { if (newScore > it) newScore else it } ?: newScore
-
+            viewModelScope.launch(Dispatchers.IO) {
                 userDataDao.insert(
                     UserData(
                         userId = uid,
                         date = currentDate,
-                        steps = finalSteps,
-                        distance = finalDistance,
-                        calories = finalCalories,
-                        score = finalScore
+                        steps = pasos,
+                        distance = distancia,
+                        calories = calorias,
+                        score = _puntuacion.value ?: 0
                     )
                 )
             }
@@ -264,51 +246,57 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
         sensorManager.unregisterListener(this)
     }
 
+    private var pasosManuales = 0
+
     override fun onSensorChanged(event: SensorEvent?) {
-        viewModelScope.launch(Dispatchers.Main) {
-            if (userId == null) {
-                stopSensor()
-                return@launch
-            }
+        if (event?.sensor?.type == Sensor.TYPE_STEP_COUNTER) {
+            viewModelScope.launch(Dispatchers.IO) {
+                // Carga los datos más recientes desde la base de datos
+                val userData = loadData()
 
-            if (event?.sensor?.type == Sensor.TYPE_STEP_COUNTER) {
-                val pasosTotales = event.values[0].toInt()
+                withContext(Dispatchers.Main) {
+                    val pasosTotales = event.values[0].toInt()
 
-                // Inicializa pasosIniciales si es la primera vez que se ejecuta
-                if (pasosIniciales == null) {
-                    _pasos.value?.let {
-                        pasosIniciales = pasosTotales - it
+                    // Inicializa pasosIniciales si es la primera vez que se ejecuta
+                    if (pasosIniciales == null) {
+                        userData?.steps?.let {
+                            pasosIniciales = pasosTotales - it
+                        }
                     }
-                }
 
-                // Calcula los pasos actuales
-                val pasosActuales = pasosTotales - (pasosIniciales ?: pasosTotales)
-                _pasos.value = pasosActuales
+                    // Calcula los pasos actuales
+                    val pasosActuales = pasosTotales - (pasosIniciales ?: pasosTotales)
+                    _pasos.value = pasosActuales
 
-                // Calcula la distancia recorrida (en kilómetros)
-                val distanciaRecorrida = pasosActuales * 0.762f / 1000
-                _distancia.value = distanciaRecorrida
+                    // Calcula la distancia recorrida (en kilómetros)
+                    val distanciaRecorrida = pasosActuales * 0.762f / 1000
+                    _distancia.value = distanciaRecorrida
 
-                // Calcula las calorías quemadas
-                val caloriasQuemadas = (pasosActuales * 0.05f).toInt()
-                _calorias.value = caloriasQuemadas
+                    // Calcula las calorías quemadas
+                    val caloriasQuemadas = (pasosActuales * 0.05f).toInt()
+                    _calorias.value = caloriasQuemadas
 
-                actualizarPuntuacion(pasosActuales)
+                    actualizarPuntuacion(pasosActuales)
 
-                // Actualiza los datos del cronómetro si está corriendo y no está en pausa
-                if (_isRunning.value == true && _isPaused.value == false) {
-                    val pasosCronometroActuales = pasosActuales - pasosCronometroIniciales
-                    _pasosCronometro.value = pasosCronometroActuales
+                    // Guarda los datos actualizados en Room
+                    saveData(pasosActuales, distanciaRecorrida, caloriasQuemadas)
 
-                    val distanciaCronometro = pasosCronometroActuales * 0.762f / 1000
-                    _distanciaCronometro.value = distanciaCronometro
+                    // Actualiza los datos del cronómetro si está corriendo y no está en pausa
+                    if (_isRunning.value == true && _isPaused.value == false) {
+                        val pasosCronometroActuales = pasosActuales - pasosCronometroIniciales
+                        _pasosCronometro.value = pasosCronometroActuales
 
-                    val caloriasCronometro = (pasosCronometroActuales * 0.05f).toInt()
-                    _caloriasCronometro.value = caloriasCronometro
+                        val distanciaCronometro = pasosCronometroActuales * 0.762f / 1000
+                        _distanciaCronometro.value = distanciaCronometro
+
+                        val caloriasCronometro = (pasosCronometroActuales * 0.05f).toInt()
+                        _caloriasCronometro.value = caloriasCronometro
+                    }
                 }
             }
         }
     }
+
     // Inicia el cronómetro
     fun startCronometro() {
         _isRunning.value = true

@@ -117,13 +117,13 @@ class MainActivity : ComponentActivity() {
 
     override fun onPause() {
         super.onPause()
-        menuViewModel.saveData()
+
         menuViewModel.saveDataToFirestore()
     }
 
     override fun onStop() {
         super.onStop()
-        menuViewModel.saveData()
+
         menuViewModel.saveDataToFirestore()
     }
 

@@ -46,7 +46,6 @@ fun Inicio(menuViewModel: MenuViewModel) {
 
     LaunchedEffect(Unit) {
         menuViewModel.loadMostRecentEntrenamiento()
-        menuViewModel.loadData()
         menuViewModel.loadWeeklyData()
         menuViewModel.loadTotalScore()
     }

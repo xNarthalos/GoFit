@@ -29,6 +29,6 @@ class ForgotPasswordViewModel : ViewModel() {
     fun resetPassword(email: String){
         firebaseAuth.sendPasswordResetEmail(email)
     }
-    // Función que valida el formato del email
+    // Función que comprueba el formato del email
     private fun isValidEmail(email: String): Boolean= Patterns.EMAIL_ADDRESS.matcher(email).matches()
 }
