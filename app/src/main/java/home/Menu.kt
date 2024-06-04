@@ -55,7 +55,7 @@ fun Menu(
             )
         },
         bottomBar = {
-            MyBottomNavigation(innerNavController,menuViewModel)
+            MyBottomNavigation(innerNavController)
         }
     ) { innerPadding ->
         NavHost(
@@ -125,7 +125,7 @@ fun MyTopAppBar(
 
 
 @Composable
-fun MyBottomNavigation(navigationController: NavHostController,menuViewModel: MenuViewModel) {
+fun MyBottomNavigation(navigationController: NavHostController) {
     var index by remember { mutableStateOf(0) }
     NavigationBar(containerColor = colorResource(id = R.color.verdeOscuro)) {
         NavigationBarItem(

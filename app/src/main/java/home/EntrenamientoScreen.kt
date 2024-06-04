@@ -7,12 +7,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DirectionsRun
-import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
-import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -37,7 +34,7 @@ fun Entrenamiento(menuViewModel: MenuViewModel = viewModel()) {
     val time by menuViewModel.tiempoCronometro.observeAsState(0L)
     val verdeClaro = colorResource(id = R.color.verdeClaro)
     val buttonColor = remember { mutableStateOf(verdeClaro) }
-    var isButtonEnabled by remember { mutableStateOf(true) }
+    val isButtonEnabled by remember { mutableStateOf(true) }
 
     Column(
         modifier = Modifier

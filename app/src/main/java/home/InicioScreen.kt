@@ -29,7 +29,6 @@ fun Inicio(menuViewModel: MenuViewModel) {
     val calorias by menuViewModel.calorias.observeAsState(0)
     val distancia by menuViewModel.distancia.observeAsState(0f)
     val weeklyData by menuViewModel.weeklyData.observeAsState(emptyList())
-    val puntuacion by menuViewModel.puntuacion.observeAsState(0)
     val puntuacionTotal by menuViewModel.puntuacionTotal.observeAsState(0)
 
     val dayAbbreviations = mapOf(
@@ -291,7 +290,8 @@ fun generateWeeklySummary(
     weeklyDayData.forEach { data ->
         calendar.time = dateFormat.parse(data.date)!!
         val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
-        val dayAbbreviation = dayAbbreviations[(dayOfWeek + 5) % 7] // Ajuste para que domingo sea el último día
+        // Ajuste para que domingo sea el último día
+        val dayAbbreviation = dayAbbreviations[(dayOfWeek + 5) % 7]
         tempData[dayAbbreviation] = when (dataType) {
             "steps" -> data.steps.toString()
             "calories" -> data.calories.toString()

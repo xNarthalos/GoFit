@@ -48,10 +48,9 @@ class RegistroViewModel : ViewModel() {
     val repeatPasswordVisibility: LiveData<Boolean> = _repeatPasswordVisibility
     // MutableLiveData para almacenar errores de email
     private val _emailError = MutableLiveData<String?>()
-    val emailError: LiveData<String?> = _emailError
+
     // MutableLiveData para controlar el enfoque de los campos de entrada
     private val _hasFocus = MutableLiveData<Boolean>()
-    val hasFocus: LiveData<Boolean> = _hasFocus
 
     // Al inciar  establecemos una fecha de nacimiento predeterminada hace 18 años para el calendario
     init {

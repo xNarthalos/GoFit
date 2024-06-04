@@ -60,7 +60,7 @@ fun Perfil(menuViewModel: MenuViewModel) {
                         )
                         Divider(color = Color.White, thickness = 1.dp)
                         Spacer(modifier = Modifier.height(16.dp))
-                        DaylyGoal()
+                        DaylyGoal(menuViewModel)
                     }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
@@ -91,11 +91,14 @@ fun Perfil(menuViewModel: MenuViewModel) {
 }
 
 @Composable
-fun DaylyGoal() {
-    var dailyStepsGoal by remember { mutableStateOf(5000f) }
+fun DaylyGoal(stepsViewModel: MenuViewModel) {
+    val dailyStepsGoal by stepsViewModel._dailyStepsGoal.collectAsState()
     var goalSliderDialogOpen by remember { mutableStateOf(false) }
 
-    Column {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxWidth()
+    ) {
         Text(
             text = "Objetivo de pasos diario",
             fontSize = 18.sp,
@@ -127,7 +130,7 @@ fun DaylyGoal() {
                         ) {
                             IconButton(
                                 onClick = {
-                                    if (dailyStepsGoal > 500) dailyStepsGoal -= 500
+                                    if (dailyStepsGoal > 500) stepsViewModel.setDailyStepsGoal(dailyStepsGoal - 500)
                                 },
                                 modifier = Modifier.size(48.dp)
                             ) {
@@ -135,14 +138,14 @@ fun DaylyGoal() {
                             }
                             Slider(
                                 value = dailyStepsGoal,
-                                onValueChange = { dailyStepsGoal = it },
-                                valueRange = 500f..90000f,
-                                steps = ((90000f - 500f) / 500f).toInt() - 1,
+                                onValueChange = { stepsViewModel.setDailyStepsGoal(it) },
+                                valueRange = 500f..35000f,
+                                steps = ((35000f - 500f) / 500f).toInt() - 1,
                                 modifier = Modifier.weight(1f)
                             )
                             IconButton(
                                 onClick = {
-                                    if (dailyStepsGoal < 90000) dailyStepsGoal += 500
+                                    if (dailyStepsGoal < 35000) stepsViewModel.setDailyStepsGoal(dailyStepsGoal + 500)
                                 },
                                 modifier = Modifier.size(48.dp)
                             ) {
@@ -167,11 +170,35 @@ fun DaylyGoal() {
                         Text("Cancelar")
                     }
                 },
-
-                )
+            )
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = "¿Como obtengo Puntuación?",
+                fontSize = 16.sp,
+                color = Color.White,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            Divider(
+                color = Color.White,
+                thickness = 1.dp,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            Text(
+                text = "-Obten 1 punto por cada 200 pasos dados.\n-Al cumplir un objetivo diario obtienes el equivalente en puntos de esos pasos doblados.",
+                fontSize = 12.sp,
+                color = Color.White,
+                modifier = Modifier.padding(top = 8.dp)
+            )
         }
     }
 }
+
+
 
 @Composable
 fun UserDataFields(menuViewModel: MenuViewModel) {
@@ -187,7 +214,7 @@ fun UserDataFields(menuViewModel: MenuViewModel) {
     val genderOptions = listOf("Hombre", "Mujer")
 
     Column {
-        // Gender
+
         Text(
             text = "Género",
             fontSize = 18.sp,
@@ -220,7 +247,7 @@ fun UserDataFields(menuViewModel: MenuViewModel) {
             }
         }
 
-        // Height
+
         Text(
             text = "Altura",
             fontSize = 18.sp,
@@ -292,7 +319,7 @@ fun UserDataFields(menuViewModel: MenuViewModel) {
                 })
         }
 
-        // Weight
+
         Text(
             text = "Peso",
             fontSize = 18.sp,
@@ -364,7 +391,7 @@ fun UserDataFields(menuViewModel: MenuViewModel) {
                 })
         }
 
-        // Birth Date
+
         Text(
             text = "Fecha de Nacimiento",
             fontSize = 18.sp,
