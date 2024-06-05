@@ -23,7 +23,7 @@ abstract class GoFitDatabase : RoomDatabase() {
                     context.applicationContext,
                     GoFitDatabase::class.java,
                     "gofit_database"
-                )   // fallbackToDestructiveMigration destruye la base de datos existente en caso de que haya una incompatibilidad de versiones, y crea una nueva
+                )   // Destruye la base de datos existente en caso de que haya una incompatibilidad de versiones, y crea una nueva
                     .fallbackToDestructiveMigration()
 
                     .build()

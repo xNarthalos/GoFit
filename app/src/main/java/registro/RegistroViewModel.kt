@@ -1,9 +1,12 @@
 package registro
 
+import android.app.Application
 import android.util.Patterns
+import android.widget.Toast
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import androidx.navigation.NavHostController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -12,7 +15,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
-class RegistroViewModel : ViewModel() {
+class RegistroViewModel(application: Application) : AndroidViewModel(application) {
     // Obtenemos la instancia de firebaseauth para manejar la autenticación desde firebase
     private val auth: FirebaseAuth = Firebase.auth
     // Obtenemos la instancia de firebase para controlar la base de datos de firestore
@@ -120,17 +123,32 @@ class RegistroViewModel : ViewModel() {
         _hasFocus.value = hasFocus
     }
     // Función que sirve para  registrar un nuevo usuario con el email y la contraseña
-    fun registro(email: String, password: String) {
+    fun registro(email: String, password: String, navigationController: NavHostController) {
         auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 val user = auth.currentUser
                 user?.let {
-                    //guardamos sus datos en firebase
                     guardarDatosUsuario(it.uid)
+                    navigationController.navigate("Menu")
+                }
+            } else {
+                task.exception?.let {
+                    if (it.message?.contains("The email address is already in use") == true) {
+                        showToast("La cuenta ya existe")
+                    } else {
+                        showToast("Error al registrar la cuenta")
+                    }
                 }
             }
         }
+
     }
+    // Función para mostrar un Toast
+    private fun showToast(message: String) {
+        Toast.makeText(getApplication(), message, Toast.LENGTH_LONG).show()
+    }
+
+
     // Función que guarda los datos del usuario en Firebase
     fun guardarDatosUsuario(uid: String) {
         val email = _email.value

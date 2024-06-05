@@ -116,7 +116,6 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
     val showDatePickerDialog: LiveData<Boolean> = _showDatePickerDialog
     // LiveData para almacenar la puntuación actual del usuario
     private val _puntuacion = MutableLiveData<Int>()
-    val puntuacion: LiveData<Int> = _puntuacion
     // LiveData para almacenar la puntuación total del usuario
     private val _puntuacionTotal = MutableLiveData<Int>()
     val puntuacionTotal: LiveData<Int> = _puntuacionTotal
@@ -199,11 +198,11 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
                     _userName.value = document.getString("usuario")
                     // Si el documento no contiene el campo "usuario", establece un valor predeterminado
                 } else {
-                    _userName.value = "Usuario"
+                    _userName.value = ""
                 }
             }.addOnFailureListener {
                 // En caso de fallo al obtener el documento, establece un valor predeterminado
-                _userName.value = "Usuario"
+                _userName.value = ""
             }
         }
     }

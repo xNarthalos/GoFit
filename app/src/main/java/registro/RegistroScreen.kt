@@ -154,8 +154,8 @@ fun BodyRegistro(modifier: Modifier, viewModel: RegistroViewModel, navigationCon
 @Composable
 fun BotonRegistro(registroEnable: Boolean, email :String, password: String, viewModel: RegistroViewModel, navigationController: NavHostController ) {
     Button(
-        onClick = {viewModel.registro(email,password)
-                   navigationController.navigate("Menu")},
+        onClick = {viewModel.registro(email,password,navigationController)
+                  },
         enabled = registroEnable,
         modifier = Modifier
             .fillMaxWidth()
