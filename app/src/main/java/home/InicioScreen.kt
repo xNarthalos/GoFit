@@ -224,51 +224,61 @@ fun WeeklyCard(
 fun MostRecentEntrenamientoCard(menuViewModel: MenuViewModel) {
     val mostRecentEntrenamiento by menuViewModel.mostRecentEntrenamiento.observeAsState()
 
-    mostRecentEntrenamiento?.let { data ->
-        Card(
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight(),
+        shape = RoundedCornerShape(10.dp),
+        colors = CardDefaults.cardColors(containerColor = colorResource(id = R.color.verdeClaro))
+    ) {
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight(),
-            shape = RoundedCornerShape(10.dp),
-            colors = CardDefaults.cardColors(containerColor =  colorResource(id = R.color.verdeClaro))
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
+            Text(
+                text = "Último Entrenamiento",
+                color = Color.White,
+                fontSize = 18.sp,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+
+            if (mostRecentEntrenamiento.isNullOrEmpty()) {
                 Text(
-                    text = "Último Entrenamiento",
-                    color = Color.White,
-                    fontSize = 18.sp,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-                Text(
-                    text = "Pasos: ${data["steps"]}",
+                    text = "No hay datos disponibles.",
                     color = Color.White,
                     fontSize = 14.sp
                 )
-                Text(
-                    text = "Distancia: ${String.format("%.2f", data["distance"] as Double)} km",
-                    color = Color.White,
-                    fontSize = 14.sp
-                )
-                Text(
-                    text = "Calorías: ${data["calories"]} kcal",
-                    color = Color.White,
-                    fontSize = 14.sp
-                )
-                Text(
-                    text = "Tiempo: ${data["time"]} segundos",
-                    color = Color.White,
-                    fontSize = 14.sp
-                )
+            } else {
+                mostRecentEntrenamiento?.let { data ->
+                    Text(
+                        text = "Pasos: ${data["steps"]}",
+                        color = Color.White,
+                        fontSize = 14.sp
+                    )
+                    Text(
+                        text = "Distancia: ${String.format("%.2f", data["distance"] as Double)} km",
+                        color = Color.White,
+                        fontSize = 14.sp
+                    )
+                    Text(
+                        text = "Calorías: ${data["calories"]} kcal",
+                        color = Color.White,
+                        fontSize = 14.sp
+                    )
+                    Text(
+                        text = "Tiempo: ${data["time"]} segundos",
+                        color = Color.White,
+                        fontSize = 14.sp
+                    )
+                }
             }
         }
     }
 }
+
 
 
 

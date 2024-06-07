@@ -66,7 +66,7 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
     private val _caloriasCronometro = MutableLiveData<Int>()
     val caloriasCronometro: LiveData<Int> = _caloriasCronometro
 
-    private val _mostRecentEntrenamiento = MutableLiveData<Map<String, Any>>()
+    private val _mostRecentEntrenamiento = MutableLiveData<Map<String, Any>>(emptyMap())
     val mostRecentEntrenamiento: LiveData<Map<String, Any>> = _mostRecentEntrenamiento
 
     // Variables para almacenar los pasos iniciales y los pasos del cronómetro iniciales
@@ -217,6 +217,9 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
         _distanciaCronometro.value = 0f
         _caloriasCronometro.value = 0
         _weeklyData.value = emptyList()
+        _mostRecentEntrenamiento.value = emptyMap()
+        _puntuacionTotal.value=0
+        _userName.value = ""
         pasosIniciales = null
         pasosCronometroIniciales = 0
         _isRunning.value = false
@@ -459,6 +462,8 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
                         val mostRecentData = mostRecentDoc.data ?: emptyMap()
                         // Publica los datos más recientes en el LiveData _mostRecentEntrenamiento
                         _mostRecentEntrenamiento.postValue(mostRecentData)
+                    }else {
+                        _mostRecentEntrenamiento.postValue(emptyMap())
                     }
                 }
         }
