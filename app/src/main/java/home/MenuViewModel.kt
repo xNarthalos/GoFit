@@ -297,26 +297,19 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
         // Devuelve las fechas de inicio y fin de la semana como un par
         return Pair(startDate, endDate)
     }
-
-
-
-
     override fun onSensorChanged(event: SensorEvent?) {
         if (event?.sensor?.type == Sensor.TYPE_STEP_COUNTER) {
             viewModelScope.launch(Dispatchers.IO) {
                 // Carga los datos más recientes desde la base de datos
                 val userData = loadData()
-
                 withContext(Dispatchers.Main) {
                     val pasosTotales = event.values[0].toInt()
-
                     // Inicializa pasosIniciales si es la primera vez que se ejecuta
                     if (pasosIniciales == null) {
                         userData?.steps?.let {
                             pasosIniciales = pasosTotales - it
                         }
                     }
-
                     // Calcula los pasos actuales
                     val pasosActuales = pasosTotales - (pasosIniciales ?: pasosTotales)
                     _pasos.value = pasosActuales
@@ -330,10 +323,8 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
                     _calorias.value = caloriasQuemadas
                     //Se actualizan los puntos conseguidos por el usuario
                     actualizarPuntuacion(pasosActuales)
-
                     // Guarda los datos actualizados en Room
                     saveData(pasosActuales, distanciaRecorrida, caloriasQuemadas)
-
                     // Actualiza los datos del cronómetro si está corriendo y no está en pausa
                     if (_isRunning.value == true && _isPaused.value == false) {
                         val pasosCronometroActuales = pasosActuales - pasosCronometroIniciales
@@ -349,7 +340,6 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
             }
         }
     }
-
     // Inicia el cronómetro
     fun startCronometro() {
         // Establece el estado del cronómetro a "corriendo"
