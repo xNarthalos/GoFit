@@ -201,7 +201,7 @@ fun signOutUser(
         }
     }
 
-    menuViewModel.saveDataToFirestore()
+    menuViewModel.guardarDatosUsuario()
     menuViewModel.clearData()
     menuViewModel.updateUserId()
 }

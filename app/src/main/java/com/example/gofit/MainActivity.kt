@@ -30,7 +30,7 @@ import registro.RegistroScreen
 
 class MainActivity : ComponentActivity() {
     // Declaramos el ViewModel para gestionar el estado de la aplicación
-    private val menuViewModel: MenuViewModel by viewModels()
+    val menuViewModel: MenuViewModel by viewModels()
 
     // Controlamos el resultado de la solicitud del permiso
     private val requestPermissionLauncher = registerForActivityResult(

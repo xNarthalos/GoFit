@@ -7,6 +7,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavHostController
+import com.example.gofit.MainActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -129,6 +130,8 @@ class RegistroViewModel(application: Application) : AndroidViewModel(application
                 val user = auth.currentUser
                 user?.let {
                     guardarDatosUsuario(it.uid)
+                    // Actualizar el UID en MenuViewModel después del registro
+                    (navigationController.context as MainActivity).menuViewModel.updateUserId()
                     navigationController.navigate("Menu")
                 }
             } else {
@@ -141,8 +144,8 @@ class RegistroViewModel(application: Application) : AndroidViewModel(application
                 }
             }
         }
-
     }
+
     // Función para mostrar un Toast
     private fun showToast(message: String) {
         Toast.makeText(getApplication(), message, Toast.LENGTH_LONG).show()
