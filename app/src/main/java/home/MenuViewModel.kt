@@ -186,6 +186,7 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
             viewModelScope.launch {
                 loadData()
             }
+            startSensor()
         }
     }
 
