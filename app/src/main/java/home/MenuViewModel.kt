@@ -183,10 +183,14 @@ class MenuViewModel(application: Application) : AndroidViewModel(application), S
             loadUserData()
             loadTotalScore()
             loadUserName()
+            viewModelScope.launch {
+                loadData()
+            }
         }
     }
 
-//Metodo para obtener el nombre de usuario que se pondra en la toolbar
+
+    //Metodo para obtener el nombre de usuario que se pondra en la toolbar
     fun loadUserName() {
         // Verifica si el ID del usuario no es nulo
         userId?.let { uid ->
